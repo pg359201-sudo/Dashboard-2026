@@ -1,0 +1,29 @@
+export interface SalesRecord {
+    id: string;
+    RazonSocial: string;
+    GEC: string; // Grouping category
+    GrupoCanal: string; // Subchannel
+    RutaVenta: string; // Route
+    RutaDesarr: string; // Developer/Agent
+    UC12mm: number; // Unit Case 12 month moving
+    Var2025vs2024: number; // Growth percentage
+    ShareREFRESCOS: number; // Market Share
+    TP: number; // Average Ticket Price (Ticket Promedio)
+}
+
+export interface UserSession {
+    role: 'admin' | 'viewer' | null;
+    isAuthenticated: boolean;
+}
+
+export type FilterState = {
+    GEC: string | 'all';
+    GrupoCanal: string | 'all';
+    RutaVenta: string | 'all';
+    RutaDesarr: string | 'all';
+};
+
+export interface ChartData {
+    name: string;
+    value: number;
+}

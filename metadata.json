@@ -1,0 +1,5 @@
+{
+  "name": "SalesComander Pro",
+  "description": "A mobile-first PWA for sales management, featuring Excel data parsing, dashboard analytics with Recharts, and AI-powered insights using Google Gemini.",
+  "requestFramePermissions": []
+}
