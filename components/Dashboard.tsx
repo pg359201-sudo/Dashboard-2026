@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { SalesRecord, FilterState } from '../types';
 import { 
-    BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell
+    BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, Treemap
 } from 'recharts';
 import { ChevronDown, ChevronUp, Filter, TrendingUp, TrendingDown, DollarSign, Package, FileWarning, RefreshCw } from 'lucide-react';
 import { COLORS } from '../constants';
@@ -12,6 +12,42 @@ interface DashboardProps {
     data: SalesRecord[];
     onLogout: () => void;
 }
+
+// Custom render for Treemap cells
+const CustomizedTreemapContent = (props: any) => {
+    const { x, y, width, height, index, name, value } = props;
+
+    return (
+        <g>
+            <rect
+                x={x}
+                y={y}
+                width={width}
+                height={height}
+                style={{
+                    fill: COLORS[index % COLORS.length],
+                    stroke: '#fff',
+                    strokeWidth: 2,
+                    strokeOpacity: 1,
+                }}
+            />
+            {width > 60 && height > 40 ? (
+                <text
+                    x={x + width / 2}
+                    y={y + height / 2}
+                    textAnchor="middle"
+                    fill="#fff"
+                    fontSize={11}
+                    fontWeight="bold"
+                    style={{ pointerEvents: 'none' }}
+                >
+                    <tspan x={x + width / 2} dy="-0.6em">{name.length > 12 ? name.substring(0, 12) + '...' : name}</tspan>
+                    <tspan x={x + width / 2} dy="1.2em">{Number(value).toLocaleString()}</tspan>
+                </text>
+            ) : null}
+        </g>
+    );
+};
 
 export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogout }) => {
     const [localData, setLocalData] = useState<SalesRecord[]>(initialData);
@@ -73,16 +109,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
 
     // Chart Data Preparation
     const chartsData = useMemo(() => {
-        if (filteredData.length === 0) return { barData: [], productMixData: [] };
-        // Group by Route
-        const byRoute: Record<string, number> = {};
-        filteredData.forEach(d => {
-            const key = d.RutaVenta || 'S/R';
-            byRoute[key] = (byRoute[key] || 0) + (d.UC12mm || 0);
-        });
-        const barData = Object.keys(byRoute).map(k => ({ name: k, value: byRoute[k] })).sort((a,b) => b.value - a.value).slice(0, 10);
+        if (filteredData.length === 0) return { topClientsData: [], productMixData: [] };
+        
+        // 1. Top 10 Clients by Volume (Treemap Data)
+        const topClientsData = filteredData
+            .map(d => ({ name: d.RazonSocial, value: d.UC12mm || 0 }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 10);
 
-        // Product Mix Data (Columns from Excel)
+        // 2. Product Mix Data (Columns from Excel)
         const categories = [
             { key: 'VolColas', label: 'Colas' },
             { key: 'VolSabores', label: 'Sabores' },
@@ -100,7 +135,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
             return { name: cat.label, value: total };
         }).filter(item => item.value > 0).sort((a, b) => b.value - a.value);
 
-        return { barData, productMixData };
+        return { topClientsData, productMixData };
     }, [filteredData]);
 
     const handleFilterChange = (key: keyof FilterState, value: string) => {
@@ -210,21 +245,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
 
                 {/* Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Top Clients Treemap */}
                     <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-bold text-slate-700">Ventas por Ruta (Top 10)</h3>
+                            <h3 className="text-sm font-bold text-slate-700">Top 10 Clientes (Volumen UC)</h3>
                         </div>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartsData.barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} tick={{fill: '#64748b'}} />
-                                    <YAxis fontSize={10} tickLine={false} axisLine={false} tick={{fill: '#64748b'}} />
+                                <Treemap
+                                    data={chartsData.topClientsData}
+                                    dataKey="value"
+                                    aspectRatio={4 / 3}
+                                    stroke="#fff"
+                                    fill="#8884d8"
+                                    content={<CustomizedTreemapContent />}
+                                >
                                     <RechartsTooltip 
-                                        cursor={{ fill: '#f8fafc' }}
+                                        formatter={(value: any) => [Number(value).toLocaleString(), 'UC Volumen']}
                                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                     />
-                                    <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={32} />
-                                </BarChart>
+                                </Treemap>
                             </ResponsiveContainer>
                         </div>
                     </div>
