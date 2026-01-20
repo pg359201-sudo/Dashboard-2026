@@ -1,9 +1,8 @@
 import * as XLSX from 'xlsx';
 import { SalesRecord } from '../types';
-import { MOCK_DATA, BLOB_TOKEN } from '../constants';
+import { MOCK_DATA } from '../constants';
 
 const LOCAL_STORAGE_KEY = 'sales_commander_data';
-const DB_FILENAME = 'sales_db.json';
 
 // Helper to sanitize keys from Excel
 const sanitizeData = (rawData: any[]): SalesRecord[] => {
@@ -43,89 +42,63 @@ export const parseExcelFile = (file: File): Promise<SalesRecord[]> => {
 };
 
 /**
- * DATABASE OPERATIONS (VERCEL BLOB)
- * Improved for caching and error handling.
+ * DATABASE OPERATIONS (SERVERLESS API)
+ * Now uses the /api/sales endpoint to ensure a Single Source of Truth.
  */
 
 export const saveToStorage = async (data: SalesRecord[]): Promise<void> => {
-    // 1. Always save to LocalStorage first as immediate backup
+    // 1. Optimistic update: Save to LocalStorage immediately
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
 
-    // 2. Try Vercel Blob if token exists
-    if (BLOB_TOKEN) {
-        console.log("Saving to Cloud Database (Vercel Blob)...");
-        const response = await fetch(`https://blob.vercel-storage.com/${DB_FILENAME}`, {
-            method: 'PUT',
+    try {
+        console.log("Syncing with Cloud Database...");
+        const response = await fetch('/api/sales', {
+            method: 'POST',
             headers: {
-                'authorization': `Bearer ${BLOB_TOKEN}`,
-                'x-add-random-suffix': 'false', // Attempt to overwrite/keep filename
-                'content-type': 'application/json',
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
         });
 
         if (!response.ok) {
-            // Re-throw error so AdminPanel knows it failed
             const errorText = await response.text();
             throw new Error(`Cloud Upload Failed: ${response.status} ${errorText}`);
         }
-        console.log("Cloud Save Success");
-    } else {
-        console.warn("No BLOB_TOKEN found. Data saved to LocalStorage only.");
+        
+        console.log("Cloud Sync Success");
+    } catch (error) {
+        console.error("Failed to sync to cloud:", error);
+        throw error; // Propagate error so Admin knows it failed
     }
 };
 
 export const loadFromStorage = async (): Promise<SalesRecord[]> => {
-    // 1. Try Vercel Blob first (Source of Truth)
-    if (BLOB_TOKEN) {
-        try {
-            // List files. Add cache: 'no-store' to ensure we get the latest list.
-            const listRes = await fetch(`https://blob.vercel-storage.com?limit=100`, {
-                method: 'GET',
-                headers: { 'authorization': `Bearer ${BLOB_TOKEN}` },
-                cache: 'no-store'
-            });
-            
-            if (listRes.ok) {
-                const listData = await listRes.json();
-                
-                // Find the DB file. 
-                // Sort by uploadedAt (descending) to get the absolute latest version if duplicates exist.
-                const blobs = listData.blobs || [];
-                const dbFile = blobs
-                    .filter((b: any) => b.pathname.endsWith(DB_FILENAME))
-                    .sort((a: any, b: any) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
-                    .pop(); // Use pop() if sorting asc, or logic above. Let's fix logic:
-                
-                // Correct Sort: Newest first
-                const latestFile = blobs
-                    .filter((b: any) => b.pathname.includes(DB_FILENAME))
-                    .sort((a: any, b: any) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
-                    .reverse()[0];
-
-                if (latestFile && latestFile.url) {
-                    console.log("Downloading from Cloud Database...", latestFile.url);
-                    
-                    // Add timestamp to query to BYPASS BROWSER CACHE
-                    const cacheBuster = `?t=${new Date().getTime()}`;
-                    const dbRes = await fetch(latestFile.url + cacheBuster, {
-                        cache: 'no-store'
-                    });
-                    
-                    if (dbRes.ok) {
-                        const dbJson = await dbRes.json();
-                        // Update local cache
-                        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbJson));
-                        return dbJson;
-                    }
-                }
+    // 1. Always try to fetch fresh data from the API first
+    try {
+        console.log("Fetching fresh data from Cloud API...");
+        const response = await fetch('/api/sales', {
+            method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache' // Tell server we want fresh data
             }
-        } catch (error) {
-            console.warn("Cloud Load Failed, checking local cache:", error);
+        });
+
+        if (response.ok) {
+            const dbJson = await response.json();
+            if (Array.isArray(dbJson) && dbJson.length > 0) {
+                console.log("Cloud data loaded successfully");
+                // Update local cache for offline fallback next time
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbJson));
+                return dbJson;
+            }
+        } else if (response.status === 404) {
+            console.warn("No cloud database found yet.");
         }
+    } catch (error) {
+        console.warn("Cloud Load Failed (Offline?), falling back to local cache:", error);
     }
 
-    // 2. Fallback to LocalStorage
+    // 2. Fallback to LocalStorage if API fails or is offline
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (stored) {
         try {
@@ -135,6 +108,7 @@ export const loadFromStorage = async (): Promise<SalesRecord[]> => {
         }
     }
 
-    console.log("No data found, using MOCK_DATA");
+    // 3. Fallback to Mock Data if completely empty
+    console.log("No data found anywhere, using MOCK_DATA");
     return MOCK_DATA;
 };
