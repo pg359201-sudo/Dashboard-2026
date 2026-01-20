@@ -14,8 +14,8 @@ export const MOCK_DATA: SalesRecord[] = [
  * Checks import.meta.env (Vite) first, then process.env (Node/Webpack).
  */
 const getEnv = (key: string, fallback: string): string => {
+    // Check Vite style
     try {
-        // Check Vite style
         // @ts-ignore
         if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
             // @ts-ignore
@@ -23,11 +23,10 @@ const getEnv = (key: string, fallback: string): string => {
         }
     } catch (e) { /* ignore */ }
 
+    // Check Node/Process style safely
     try {
-        // Check Node/Process style
-        // @ts-ignore
-        if (typeof process !== 'undefined' && process.env) {
-            // @ts-ignore
+        // We use a safe check for 'process' existence
+        if (typeof process !== 'undefined' && process && process.env) {
             return process.env[key] || fallback;
         }
     } catch (e) { /* ignore */ }
