@@ -3,7 +3,7 @@ import { SalesRecord, FilterState } from '../types';
 import { 
     BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend
 } from 'recharts';
-import { ChevronDown, ChevronUp, Filter, TrendingUp, TrendingDown, DollarSign, Package } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter, TrendingUp, TrendingDown, DollarSign, Package, FileWarning } from 'lucide-react';
 import { COLORS } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 
@@ -20,49 +20,57 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onLogout }) => {
         RutaDesarr: 'all'
     });
 
+    const hasData = data && data.length > 0;
+
     // Unique values for dropdowns
     const options = useMemo(() => {
+        if (!hasData) return { GEC: [], GrupoCanal: [], RutaVenta: [], RutaDesarr: [] };
         return {
-            GEC: Array.from(new Set(data.map(d => d.GEC))).sort(),
-            GrupoCanal: Array.from(new Set(data.map(d => d.GrupoCanal))).sort(),
-            RutaVenta: Array.from(new Set(data.map(d => d.RutaVenta))).sort(),
-            RutaDesarr: Array.from(new Set(data.map(d => d.RutaDesarr))).sort(),
+            GEC: Array.from(new Set(data.map(d => d.GEC || 'S/D'))).sort(),
+            GrupoCanal: Array.from(new Set(data.map(d => d.GrupoCanal || 'S/D'))).sort(),
+            RutaVenta: Array.from(new Set(data.map(d => d.RutaVenta || 'S/D'))).sort(),
+            RutaDesarr: Array.from(new Set(data.map(d => d.RutaDesarr || 'S/D'))).sort(),
         };
-    }, [data]);
+    }, [data, hasData]);
 
     // Filtering logic
     const filteredData = useMemo(() => {
+        if (!hasData) return [];
         return data.filter(item => {
             return (filters.GEC === 'all' || item.GEC === filters.GEC) &&
                    (filters.GrupoCanal === 'all' || item.GrupoCanal === filters.GrupoCanal) &&
                    (filters.RutaVenta === 'all' || item.RutaVenta === filters.RutaVenta) &&
                    (filters.RutaDesarr === 'all' || item.RutaDesarr === filters.RutaDesarr);
         });
-    }, [data, filters]);
+    }, [data, filters, hasData]);
 
     // KPI Calculations
     const kpis = useMemo(() => {
-        const totalVol = filteredData.reduce((acc, curr) => acc + curr.UC12mm, 0);
+        if (filteredData.length === 0) return { totalVol: 0, totalGrowth: 0, avgShare: 0 };
+        const totalVol = filteredData.reduce((acc, curr) => acc + (curr.UC12mm || 0), 0);
         // Weighted average for growth based on volume
-        const totalGrowth = filteredData.reduce((acc, curr) => acc + (curr.Var2025vs2024 * curr.UC12mm), 0) / (totalVol || 1);
-        const avgShare = filteredData.reduce((acc, curr) => acc + curr.ShareREFRESCOS, 0) / (filteredData.length || 1);
+        const totalGrowth = filteredData.reduce((acc, curr) => acc + ((curr.Var2025vs2024 || 0) * (curr.UC12mm || 0)), 0) / (totalVol || 1);
+        const avgShare = filteredData.reduce((acc, curr) => acc + (curr.ShareREFRESCOS || 0), 0) / (filteredData.length || 1);
         
         return { totalVol, totalGrowth, avgShare };
     }, [filteredData]);
 
     // Chart Data Preparation
     const chartsData = useMemo(() => {
+        if (filteredData.length === 0) return { barData: [], pieData: [] };
         // Group by Route
         const byRoute: Record<string, number> = {};
         filteredData.forEach(d => {
-            byRoute[d.RutaVenta] = (byRoute[d.RutaVenta] || 0) + d.UC12mm;
+            const key = d.RutaVenta || 'S/R';
+            byRoute[key] = (byRoute[key] || 0) + (d.UC12mm || 0);
         });
         const barData = Object.keys(byRoute).map(k => ({ name: k, value: byRoute[k] })).sort((a,b) => b.value - a.value).slice(0, 10);
 
         // Group by GEC
         const byGEC: Record<string, number> = {};
         filteredData.forEach(d => {
-            byGEC[d.GEC] = (byGEC[d.GEC] || 0) + d.UC12mm;
+            const key = d.GEC || 'Otros';
+            byGEC[key] = (byGEC[key] || 0) + (d.UC12mm || 0);
         });
         const pieData = Object.keys(byGEC).map(k => ({ name: k, value: byGEC[k] }));
 
@@ -72,6 +80,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onLogout }) => {
     const handleFilterChange = (key: keyof FilterState, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
     };
+
+    if (!hasData) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-md">
+                    <FileWarning className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-slate-800 mb-2">Sin Datos Disponibles</h2>
+                    <p className="text-slate-500 mb-6">
+                        No se han encontrado registros de ventas. Ingrese como Administrador para cargar el archivo Excel mensual.
+                    </p>
+                    <button onClick={onLogout} className="text-blue-600 font-medium hover:underline">
+                        Volver al Login
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">

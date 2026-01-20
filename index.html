@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SalesComander Pro</title>
-    <!-- Tailwind via CDN for simplicity, though package.json has it too. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -16,30 +15,12 @@
               ring: "hsl(var(--ring))",
               background: "hsl(var(--background))",
               foreground: "hsl(var(--foreground))",
-              primary: {
-                DEFAULT: "#2563eb",
-                foreground: "#ffffff",
-              },
-              secondary: {
-                DEFAULT: "#f1f5f9",
-                foreground: "#0f172a",
-              },
-              destructive: {
-                DEFAULT: "#ef4444",
-                foreground: "#ffffff",
-              },
-              muted: {
-                DEFAULT: "#f1f5f9",
-                foreground: "#64748b",
-              },
-              accent: {
-                DEFAULT: "#f1f5f9",
-                foreground: "#0f172a",
-              },
-              card: {
-                DEFAULT: "#ffffff",
-                foreground: "#020817",
-              },
+              primary: { DEFAULT: "#2563eb", foreground: "#ffffff" },
+              secondary: { DEFAULT: "#f1f5f9", foreground: "#0f172a" },
+              destructive: { DEFAULT: "#ef4444", foreground: "#ffffff" },
+              muted: { DEFAULT: "#f1f5f9", foreground: "#64748b" },
+              accent: { DEFAULT: "#f1f5f9", foreground: "#0f172a" },
+              card: { DEFAULT: "#ffffff", foreground: "#020817" },
             },
           },
         },
@@ -84,8 +65,8 @@
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "recharts": "https://esm.sh/recharts@^3.6.0",
     "react-markdown": "https://esm.sh/react-markdown@^10.1.0",
-    "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "vite": "https://esm.sh/vite@^7.3.1"
   }
 }
 </script>
