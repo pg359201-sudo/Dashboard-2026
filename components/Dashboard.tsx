@@ -350,6 +350,12 @@ const KpiCard: React.FC<{ title: string, value: string, icon: React.ReactNode, t
 const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
     const [isOpen, setIsOpen] = useState(false);
 
+    // Helper to calculate percentage safe from NaN/Infinity
+    const getCatShare = (vol: number) => {
+        if (!client.UC12mm || client.UC12mm === 0) return '0.0%';
+        return ((vol / client.UC12mm) * 100).toFixed(1) + '%';
+    };
+
     return (
         <div className="group transition-colors hover:bg-slate-50">
             <button 
@@ -377,18 +383,10 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                             <span className="font-medium text-slate-700">{client.RutaVenta}</span>
                         </div>
                         <div>
-                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">Desarrollador</span>
-                            <span className="font-medium text-slate-700">{client.RutaDesarr}</span>
-                        </div>
-                        <div>
                             <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">Crecimiento</span>
                             <span className={`font-medium ${client.Var2025vs2024 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {(client.Var2025vs2024 * 100).toFixed(1)}%
                             </span>
-                        </div>
-                        <div>
-                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">Ticket Promedio</span>
-                            <span className="font-medium text-slate-700">S/ {client.TP.toFixed(2)}</span>
                         </div>
                         <div className="col-span-2">
                             <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-1">Share Refrescos</span>
@@ -402,6 +400,32 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                                 <span className="text-xs font-bold text-slate-700 w-10 text-right">
                                     {(client.ShareREFRESCOS * 100).toFixed(0)}%
                                 </span>
+                            </div>
+                        </div>
+
+                        {/* New Category Mix Section */}
+                        <div className="col-span-2 pt-2 border-t border-slate-100 border-dashed mt-1">
+                             <div className="grid grid-cols-3 gap-y-2 gap-x-1">
+                                <div>
+                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Aguas</span>
+                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolAgua)}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Jugos</span>
+                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolJugos)}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Energy</span>
+                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolEnergizantes)}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Spirits</span>
+                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolSpirits)}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Vinos</span>
+                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolVinos)}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
