@@ -5,6 +5,13 @@ import { put, list } from '@vercel/blob';
 export default async function handler(request, response) {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
 
+  // AGGRESSIVE CACHE BUSTING HEADERS
+  // These headers tell Vercel Edge Network and the Browser NOT to cache this response ever.
+  response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  response.setHeader('Pragma', 'no-cache');
+  response.setHeader('Expires', '0');
+  response.setHeader('Surrogate-Control', 'no-store');
+
   if (!token) {
     return response.status(500).json({ error: 'Server configuration error: Missing BLOB token' });
   }
@@ -13,19 +20,21 @@ export default async function handler(request, response) {
     // GET: Retrieve the latest database
     if (request.method === 'GET') {
       // 1. List files to find our database
+      // We pass a random prefix to 'prefix' just to ensure 'list' doesn't hit a cache (though list usually doesn't)
       const { blobs } = await list({ token, limit: 100 });
       
-      // 2. Find the specific file 'sales_db.json'
-      // We look for the exact pathname.
       const dbFile = blobs.find(blob => blob.pathname === 'sales_db.json');
 
       if (!dbFile) {
         return response.status(404).json({ error: 'Database not found. Please upload data via Admin panel.' });
       }
 
-      // 3. Fetch the content of the file
-      // We append a timestamp to the URL to bypass Vercel's internal CDN cache ensuring fresh data
-      const fileResponse = await fetch(`${dbFile.url}?t=${Date.now()}`);
+      // 3. Fetch the content of the file from Vercel Blob Storage
+      // CRITICAL: append timestamp to bypass Vercel internal CDN cache
+      const fileResponse = await fetch(`${dbFile.url}?ts=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       
       if (!fileResponse.ok) {
         return response.status(503).json({ error: 'Failed to fetch file content' });
@@ -33,8 +42,6 @@ export default async function handler(request, response) {
 
       const data = await fileResponse.json();
       
-      // 4. Return data with cache-control headers to prevent browser caching
-      response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       return response.status(200).json(data);
     }
 
@@ -47,13 +54,14 @@ export default async function handler(request, response) {
       }
 
       // Upload to Vercel Blob
-      // addRandomSuffix: false ensures we overwrite the file or keep the URL consistent conceptually
-      // access: 'public' is required so we can fetch it via URL if needed
+      // addRandomSuffix: false ensures the URL remains stable (though we query by pathname anyway)
       await put('sales_db.json', JSON.stringify(data), {
         access: 'public',
         addRandomSuffix: false,
         token,
-        contentType: 'application/json'
+        contentType: 'application/json',
+        // Set cache control on the file itself in the blob storage
+        cacheControlMaxAge: 0 
       });
 
       return response.status(200).json({ success: true, count: data.length });

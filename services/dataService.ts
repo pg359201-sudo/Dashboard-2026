@@ -72,14 +72,17 @@ export const saveToStorage = async (data: SalesRecord[]): Promise<void> => {
     }
 };
 
-export const loadFromStorage = async (): Promise<SalesRecord[]> => {
+export const loadFromStorage = async (forceCloud: boolean = false): Promise<SalesRecord[]> => {
     // 1. Always try to fetch fresh data from the API first
     try {
         console.log("Fetching fresh data from Cloud API...");
-        const response = await fetch('/api/sales', {
+        // CRITICAL: We add ?_t=TIMESTAMP to the URL.
+        // This forces the browser to treat it as a brand new request, ignoring its local cache.
+        const response = await fetch(`/api/sales?_t=${new Date().getTime()}`, {
             method: 'GET',
             headers: {
-                'Cache-Control': 'no-cache' // Tell server we want fresh data
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
             }
         });
 
@@ -99,12 +102,16 @@ export const loadFromStorage = async (): Promise<SalesRecord[]> => {
     }
 
     // 2. Fallback to LocalStorage if API fails or is offline
-    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (stored) {
-        try {
-            return JSON.parse(stored);
-        } catch (e) {
-            console.error("Local storage corrupted");
+    // Only use fallback if we are NOT strictly forcing a cloud refresh
+    if (!forceCloud) {
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (stored) {
+            try {
+                console.log("Using cached LocalStorage data.");
+                return JSON.parse(stored);
+            } catch (e) {
+                console.error("Local storage corrupted");
+            }
         }
     }
 

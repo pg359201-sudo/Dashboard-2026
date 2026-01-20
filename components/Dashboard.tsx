@@ -3,16 +3,19 @@ import { SalesRecord, FilterState } from '../types';
 import { 
     BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend
 } from 'recharts';
-import { ChevronDown, ChevronUp, Filter, TrendingUp, TrendingDown, DollarSign, Package, FileWarning, CloudLightning } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter, TrendingUp, TrendingDown, DollarSign, Package, FileWarning, RefreshCw } from 'lucide-react';
 import { COLORS } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
+import { loadFromStorage } from '../services/dataService';
 
 interface DashboardProps {
     data: SalesRecord[];
     onLogout: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ data, onLogout }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogout }) => {
+    const [localData, setLocalData] = useState<SalesRecord[]>(initialData);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [filters, setFilters] = useState<FilterState>({
         GEC: 'all',
         GrupoCanal: 'all',
@@ -20,29 +23,42 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onLogout }) => {
         RutaDesarr: 'all'
     });
 
-    const hasData = data && data.length > 0;
+    const hasData = localData && localData.length > 0;
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        try {
+            // Force true triggers the strict cloud fetch
+            const freshData = await loadFromStorage(true);
+            setLocalData(Array.isArray(freshData) ? freshData : []);
+        } catch (e) {
+            console.error("Error updating data", e);
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
 
     // Unique values for dropdowns
     const options = useMemo(() => {
         if (!hasData) return { GEC: [], GrupoCanal: [], RutaVenta: [], RutaDesarr: [] };
         return {
-            GEC: Array.from(new Set(data.map(d => d.GEC || 'S/D'))).sort(),
-            GrupoCanal: Array.from(new Set(data.map(d => d.GrupoCanal || 'S/D'))).sort(),
-            RutaVenta: Array.from(new Set(data.map(d => d.RutaVenta || 'S/D'))).sort(),
-            RutaDesarr: Array.from(new Set(data.map(d => d.RutaDesarr || 'S/D'))).sort(),
+            GEC: Array.from(new Set(localData.map(d => d.GEC || 'S/D'))).sort(),
+            GrupoCanal: Array.from(new Set(localData.map(d => d.GrupoCanal || 'S/D'))).sort(),
+            RutaVenta: Array.from(new Set(localData.map(d => d.RutaVenta || 'S/D'))).sort(),
+            RutaDesarr: Array.from(new Set(localData.map(d => d.RutaDesarr || 'S/D'))).sort(),
         };
-    }, [data, hasData]);
+    }, [localData, hasData]);
 
     // Filtering logic
     const filteredData = useMemo(() => {
         if (!hasData) return [];
-        return data.filter(item => {
+        return localData.filter(item => {
             return (filters.GEC === 'all' || item.GEC === filters.GEC) &&
                    (filters.GrupoCanal === 'all' || item.GrupoCanal === filters.GrupoCanal) &&
                    (filters.RutaVenta === 'all' || item.RutaVenta === filters.RutaVenta) &&
                    (filters.RutaDesarr === 'all' || item.RutaDesarr === filters.RutaDesarr);
         });
-    }, [data, filters, hasData]);
+    }, [localData, filters, hasData]);
 
     // KPI Calculations
     const kpis = useMemo(() => {
@@ -93,6 +109,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onLogout }) => {
                     <button onClick={onLogout} className="text-blue-600 font-medium hover:underline">
                         Volver al Login
                     </button>
+                    <button 
+                        onClick={handleRefresh}
+                        className="mt-4 w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg transition-colors"
+                    >
+                         {isRefreshing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                         Intentar Reconexión
+                    </button>
                 </div>
             </div>
         );
@@ -104,12 +127,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onLogout }) => {
             <header className="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-20 flex justify-between items-center shadow-sm">
                 <div>
                     <h1 className="text-lg font-bold text-slate-900 leading-tight">SalesComander Pro</h1>
-                    <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex items-center gap-2 mt-1">
                         <span className="flex h-2 w-2 relative">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                         </span>
-                        <p className="text-xs text-slate-500 font-medium">Online • Datos en Nube</p>
+                        <p className="text-xs text-slate-500 font-medium">Online</p>
+                        
+                        {/* Refresh Button */}
+                        <button 
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
+                            className="ml-2 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded border border-blue-200 transition-colors"
+                        >
+                            <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                            {isRefreshing ? 'Actualizando...' : 'Actualizar Datos'}
+                        </button>
                     </div>
                 </div>
                 <button onClick={onLogout} className="text-xs font-medium text-slate-600 hover:text-red-600 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
