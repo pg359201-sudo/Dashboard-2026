@@ -16,7 +16,18 @@ const sanitizeData = (rawData: any[]): SalesRecord[] => {
         UC12mm: Number(row['UC 12mm'] || row['Volumen'] || 0),
         Var2025vs2024: Number(row['Var 2025 vs 2024'] || row['Crecimiento'] || 0),
         ShareREFRESCOS: Number(row['Share REFRESCOS'] || row['Share'] || 0),
-        TP: Number(row['TP'] || 0)
+        TP: Number(row['TP'] || 0),
+
+        // Parsing detailed product categories based on header image
+        VolColas: Number(row['COLAS'] || 0),
+        VolSabores: Number(row['SABORES'] || 0),
+        VolAgua: Number(row['AGUA PLAIN'] || row['AGUA'] || 0),
+        VolSaborizadas: Number(row['SABORIZADAS'] || 0),
+        VolJugos: Number(row['JUGOS'] || 0),
+        VolIsotonico: Number(row['ISOTÓNICO'] || row['ISOTONICO'] || 0),
+        VolEnergizantes: Number(row['ENERGIZANTES'] || 0),
+        VolSpirits: Number(row['SPIRITS'] || 0),
+        VolVinos: Number(row['VINOS'] || 0)
     }));
 };
 
@@ -42,8 +53,7 @@ export const parseExcelFile = (file: File): Promise<SalesRecord[]> => {
 };
 
 /**
- * DATABASE OPERATIONS (SERVERLESS API)
- * Now uses the /api/sales endpoint to ensure a Single Source of Truth.
+ * DATABASE OPERATIONS
  */
 
 export const saveToStorage = async (data: SalesRecord[]): Promise<void> => {
@@ -51,24 +61,28 @@ export const saveToStorage = async (data: SalesRecord[]): Promise<void> => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
 
     try {
-        console.log("Syncing with Cloud Database...");
+        console.log("Starting Cloud Sync via Server API...");
+        
+        // Use the existing API endpoint to handle the upload server-side
+        // This avoids 404s from missing /api/upload routes for client-side upload handling
         const response = await fetch('/api/sales', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(data)
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Cloud Upload Failed: ${response.status} ${errorText}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Upload failed with status ${response.status}`);
         }
-        
-        console.log("Cloud Sync Success");
+
+        const result = await response.json();
+        console.log("Cloud Sync Success:", result);
     } catch (error) {
         console.error("Failed to sync to cloud:", error);
-        throw error; // Propagate error so Admin knows it failed
+        throw error; 
     }
 };
 

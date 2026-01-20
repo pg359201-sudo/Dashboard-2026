@@ -18,22 +18,21 @@ export const generateSalesAnalysis = async (
 
         const dataString = JSON.stringify(summary);
 
-        const systemPrompt = `
-        Eres un analista de ventas experto para la app SalesComander Pro.
+        const systemInstruction = `Eres un analista de ventas experto para la app SalesComander Pro.
         Responde basándote estrictamente en los datos adjuntos en formato JSON.
         Los datos representan clientes, volumen (UC 12mm), crecimiento (Var 2025 vs 2024), share y ticket promedio (TP).
         
         Si te preguntan por totales, calcula la suma de los datos proporcionados.
-        Sé conciso, profesional y usa formato Markdown para resaltar números clave.
-        
-        DATOS DE CONTEXTO (Top clientes por volumen):
-        ${dataString}
-        `;
+        Sé conciso, profesional y usa formato Markdown para resaltar números clave.`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
-            contents: systemPrompt + "\n\nPregunta del usuario: " + query,
+            contents: `DATOS DE CONTEXTO (Top clientes por volumen):
+            ${dataString}
+            
+            Pregunta del usuario: ${query}`,
              config: {
+                systemInstruction: systemInstruction,
                 thinkingConfig: { thinkingBudget: 0 } // Disable thinking for faster response on flash model
             }
         });

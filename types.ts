@@ -5,10 +5,21 @@ export interface SalesRecord {
     GrupoCanal: string; // Subchannel
     RutaVenta: string; // Route
     RutaDesarr: string; // Developer/Agent
-    UC12mm: number; // Unit Case 12 month moving
+    UC12mm: number; // Unit Case 12 month moving (Total)
     Var2025vs2024: number; // Growth percentage
     ShareREFRESCOS: number; // Market Share
     TP: number; // Average Ticket Price (Ticket Promedio)
+    
+    // New breakdown categories
+    VolColas: number;
+    VolSabores: number;
+    VolAgua: number;
+    VolSaborizadas: number;
+    VolJugos: number;
+    VolIsotonico: number;
+    VolEnergizantes: number;
+    VolSpirits: number;
+    VolVinos: number;
 }
 
 export interface UserSession {

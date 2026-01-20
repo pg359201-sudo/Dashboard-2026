@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { SalesRecord, FilterState } from '../types';
 import { 
-    BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend
+    BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell
 } from 'recharts';
 import { ChevronDown, ChevronUp, Filter, TrendingUp, TrendingDown, DollarSign, Package, FileWarning, RefreshCw } from 'lucide-react';
 import { COLORS } from '../constants';
@@ -73,7 +73,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
 
     // Chart Data Preparation
     const chartsData = useMemo(() => {
-        if (filteredData.length === 0) return { barData: [], pieData: [] };
+        if (filteredData.length === 0) return { barData: [], productMixData: [] };
         // Group by Route
         const byRoute: Record<string, number> = {};
         filteredData.forEach(d => {
@@ -82,15 +82,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
         });
         const barData = Object.keys(byRoute).map(k => ({ name: k, value: byRoute[k] })).sort((a,b) => b.value - a.value).slice(0, 10);
 
-        // Group by GEC
-        const byGEC: Record<string, number> = {};
-        filteredData.forEach(d => {
-            const key = d.GEC || 'Otros';
-            byGEC[key] = (byGEC[key] || 0) + (d.UC12mm || 0);
-        });
-        const pieData = Object.keys(byGEC).map(k => ({ name: k, value: byGEC[k] }));
+        // Product Mix Data (Columns from Excel)
+        const categories = [
+            { key: 'VolColas', label: 'Colas' },
+            { key: 'VolSabores', label: 'Sabores' },
+            { key: 'VolAgua', label: 'Agua' },
+            { key: 'VolSaborizadas', label: 'Saborizadas' },
+            { key: 'VolJugos', label: 'Jugos' },
+            { key: 'VolIsotonico', label: 'Isotónico' },
+            { key: 'VolEnergizantes', label: 'Energy' },
+            { key: 'VolSpirits', label: 'Spirits' },
+            { key: 'VolVinos', label: 'Vinos' },
+        ];
 
-        return { barData, pieData };
+        const productMixData = categories.map(cat => {
+            const total = filteredData.reduce((acc, curr) => acc + (Number(curr[cat.key as keyof SalesRecord]) || 0), 0);
+            return { name: cat.label, value: total };
+        }).filter(item => item.value > 0).sort((a, b) => b.value - a.value);
+
+        return { barData, productMixData };
     }, [filteredData]);
 
     const handleFilterChange = (key: keyof FilterState, value: string) => {
@@ -219,28 +229,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         </div>
                     </div>
 
+                    {/* Product Mix Bar Chart */}
                     <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                        <h3 className="text-sm font-bold text-slate-700 mb-4">Mix por GEC</h3>
+                        <h3 className="text-sm font-bold text-slate-700 mb-4">Mix de Productos (Volumen UC)</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={chartsData.pieData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                        stroke="none"
-                                    >
-                                        {chartsData.pieData.map((entry, index) => (
+                                <BarChart 
+                                    layout="vertical"
+                                    data={chartsData.productMixData} 
+                                    margin={{ top: 0, right: 30, left: 40, bottom: 0 }}
+                                >
+                                    <XAxis type="number" hide />
+                                    <YAxis 
+                                        type="category" 
+                                        dataKey="name" 
+                                        width={80} 
+                                        tick={{fontSize: 10, fill: '#64748b'}} 
+                                        interval={0}
+                                    />
+                                    <RechartsTooltip 
+                                        cursor={{ fill: '#f8fafc' }}
+                                        formatter={(value: any) => [Number(value).toLocaleString(), 'Volumen']}
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                    />
+                                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
+                                        {chartsData.productMixData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
-                                    </Pie>
-                                    <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                                    <Legend verticalAlign="bottom" height={36} iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
-                                </PieChart>
+                                    </Bar>
+                                </BarChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
