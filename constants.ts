@@ -10,23 +10,32 @@ export const MOCK_DATA: SalesRecord[] = [
 ];
 
 /**
- * Helper to safely access environment variables in the browser.
- * It checks for 'process' existence to prevent "process is not defined" crashes.
+ * Helper to safely access environment variables.
+ * Checks import.meta.env (Vite) first, then process.env (Node/Webpack).
  */
 const getEnv = (key: string, fallback: string): string => {
     try {
+        // Check Vite style
+        // @ts-ignore
+        if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+            // @ts-ignore
+            return import.meta.env[key];
+        }
+    } catch (e) { /* ignore */ }
+
+    try {
+        // Check Node/Process style
         // @ts-ignore
         if (typeof process !== 'undefined' && process.env) {
             // @ts-ignore
             return process.env[key] || fallback;
         }
-    } catch (e) {
-        // Ignore errors
-    }
+    } catch (e) { /* ignore */ }
+    
     return fallback;
 };
 
-// Use NEXT_PUBLIC_ prefix which is standard for exposing env vars to the browser in Vercel/Next.js
+// Use NEXT_PUBLIC_ prefix which is standard for exposing env vars to the browser
 export const ADMIN_PASSWORD = getEnv('NEXT_PUBLIC_ADMIN_PASSWORD', 'admin123');
 export const VIEWER_PASSWORD = getEnv('NEXT_PUBLIC_VIEWER_PASSWORD', 'sales2024');
 export const GEMINI_API_KEY = getEnv('NEXT_PUBLIC_GEMINI_API_KEY', '');
