@@ -1,17 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 import { SalesRecord } from "../types";
-import { GEMINI_API_KEY } from "../constants";
 
 export const generateSalesAnalysis = async (
     query: string, 
     contextData: SalesRecord[]
 ): Promise<string> => {
-    if (!GEMINI_API_KEY) {
-        return "⚠️ Error de Configuración: No se detectó la API Key de Google (NEXT_PUBLIC_GEMINI_API_KEY). Por favor configúrala en Vercel.";
-    }
-
     try {
-        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
         // Summarize context to save tokens. We send top 50 records sorted by Volume if list is huge
         // or aggregated stats.
@@ -37,9 +32,7 @@ export const generateSalesAnalysis = async (
 
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
-            contents: [
-                { role: 'user', parts: [{ text: systemPrompt + "\n\nPregunta del usuario: " + query }] }
-            ],
+            contents: systemPrompt + "\n\nPregunta del usuario: " + query,
              config: {
                 thinkingConfig: { thinkingBudget: 0 } // Disable thinking for faster response on flash model
             }
