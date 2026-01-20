@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ADMIN_PASSWORD, VIEWER_PASSWORD } from '../constants';
-import { Lock, User, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ADMIN_PASSWORD, VIEWER_PASSWORD, BLOB_TOKEN } from '../constants';
+import { Lock, User, Loader2, Database, AlertTriangle } from 'lucide-react';
 
 interface LoginProps {
     onLogin: (role: 'admin' | 'viewer') => void;
@@ -10,6 +10,13 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [dbStatus, setDbStatus] = useState<'connected' | 'local'>('local');
+
+    useEffect(() => {
+        if (BLOB_TOKEN) {
+            setDbStatus('connected');
+        }
+    }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,9 +39,24 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-                <div className="bg-blue-600 p-8 text-center">
+                <div className="bg-blue-600 p-8 text-center relative">
                     <h1 className="text-3xl font-bold text-white mb-2">SalesComander Pro</h1>
                     <p className="text-blue-100">Sistema de Gestión Comercial</p>
+                    
+                    {/* Database Status Badge */}
+                    <div className="absolute top-4 right-4">
+                         {dbStatus === 'connected' ? (
+                             <div className="flex items-center gap-1 bg-green-500/20 text-white text-[10px] px-2 py-1 rounded-full border border-green-400/30 backdrop-blur-sm">
+                                 <Database className="h-3 w-3" />
+                                 <span>Cloud DB On</span>
+                             </div>
+                         ) : (
+                             <div className="flex items-center gap-1 bg-orange-500/20 text-white text-[10px] px-2 py-1 rounded-full border border-orange-400/30 backdrop-blur-sm">
+                                 <AlertTriangle className="h-3 w-3" />
+                                 <span>Modo Local</span>
+                             </div>
+                         )}
+                    </div>
                 </div>
                 
                 <form onSubmit={handleSubmit} className="p-8">
@@ -71,8 +93,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Ingresar al Sistema'}
                     </button>
                     
-                    <div className="mt-6 text-center text-xs text-slate-400">
-                        v1.0.0 | Secured by Vercel
+                    <div className="mt-6 text-center text-xs text-slate-400 space-y-1">
+                        <p>v1.1.0 | Secured by Vercel</p>
+                        {dbStatus === 'local' && (
+                            <p className="text-orange-400">Nota: Configure BLOB_READ_WRITE_TOKEN para persistencia en nube.</p>
+                        )}
                     </div>
                 </form>
             </div>

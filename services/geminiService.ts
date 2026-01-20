@@ -1,20 +1,17 @@
 import { GoogleGenAI } from "@google/genai";
 import { SalesRecord } from "../types";
-
-// NOTE: This assumes process.env.API_KEY is available. 
-// In a real implementation, ensure the key is securely managed.
-const apiKey = process.env.API_KEY || ''; 
+import { GEMINI_API_KEY } from "../constants";
 
 export const generateSalesAnalysis = async (
     query: string, 
     contextData: SalesRecord[]
 ): Promise<string> => {
-    if (!apiKey) {
-        return "Error: API Key de Google no configurada. Por favor verifica tus variables de entorno.";
+    if (!GEMINI_API_KEY) {
+        return "⚠️ Error de Configuración: No se detectó la API Key de Google (NEXT_PUBLIC_GEMINI_API_KEY). Por favor configúrala en Vercel.";
     }
 
     try {
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
         
         // Summarize context to save tokens. We send top 50 records sorted by Volume if list is huge
         // or aggregated stats.

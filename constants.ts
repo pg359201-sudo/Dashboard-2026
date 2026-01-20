@@ -9,9 +9,27 @@ export const MOCK_DATA: SalesRecord[] = [
     { id: '6', RazonSocial: 'GRIFO PRIMAX', GEC: 'MODERNO', GrupoCanal: 'CONVENIENCE', RutaVenta: 'R-103', RutaDesarr: 'CARLOS RUIZ', UC12mm: 950, Var2025vs2024: 0.03, ShareREFRESCOS: 0.55, TP: 80 },
 ];
 
-// In a real Next.js app, these would be process.env vars.
-// For this demo, we use hardcoded fallbacks if env is missing to ensure functionality.
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-export const VIEWER_PASSWORD = process.env.NEXT_PUBLIC_VIEWER_PASSWORD || 'sales2024';
+/**
+ * Helper to safely access environment variables in the browser.
+ * It checks for 'process' existence to prevent "process is not defined" crashes.
+ */
+const getEnv = (key: string, fallback: string): string => {
+    try {
+        // @ts-ignore
+        if (typeof process !== 'undefined' && process.env) {
+            // @ts-ignore
+            return process.env[key] || fallback;
+        }
+    } catch (e) {
+        // Ignore errors
+    }
+    return fallback;
+};
+
+// Use NEXT_PUBLIC_ prefix which is standard for exposing env vars to the browser in Vercel/Next.js
+export const ADMIN_PASSWORD = getEnv('NEXT_PUBLIC_ADMIN_PASSWORD', 'admin123');
+export const VIEWER_PASSWORD = getEnv('NEXT_PUBLIC_VIEWER_PASSWORD', 'sales2024');
+export const GEMINI_API_KEY = getEnv('NEXT_PUBLIC_GEMINI_API_KEY', '');
+export const BLOB_TOKEN = getEnv('NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN', '');
 
 export const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
