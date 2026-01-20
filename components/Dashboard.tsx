@@ -16,6 +16,7 @@ interface DashboardProps {
 // Custom render for Treemap cells
 const CustomizedTreemapContent = (props: any) => {
     const { x, y, width, height, index, name, value } = props;
+    const safeName = name || 'Sin Nombre';
 
     return (
         <g>
@@ -25,7 +26,7 @@ const CustomizedTreemapContent = (props: any) => {
                 width={width}
                 height={height}
                 style={{
-                    fill: COLORS[index % COLORS.length],
+                    fill: COLORS[(index || 0) % COLORS.length],
                     stroke: '#fff',
                     strokeWidth: 2,
                     strokeOpacity: 1,
@@ -41,7 +42,7 @@ const CustomizedTreemapContent = (props: any) => {
                     fontWeight="bold"
                     style={{ pointerEvents: 'none' }}
                 >
-                    <tspan x={x + width / 2} dy="-0.6em">{name.length > 12 ? name.substring(0, 12) + '...' : name}</tspan>
+                    <tspan x={x + width / 2} dy="-0.6em">{safeName.length > 12 ? safeName.substring(0, 12) + '...' : safeName}</tspan>
                     <tspan x={x + width / 2} dy="1.2em">{Number(value).toLocaleString()}</tspan>
                 </text>
             ) : null}
@@ -50,7 +51,7 @@ const CustomizedTreemapContent = (props: any) => {
 };
 
 export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogout }) => {
-    const [localData, setLocalData] = useState<SalesRecord[]>(initialData);
+    const [localData, setLocalData] = useState<SalesRecord[]>(initialData || []);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [filters, setFilters] = useState<FilterState>({
         GEC: 'all',
