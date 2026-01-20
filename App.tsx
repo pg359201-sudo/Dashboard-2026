@@ -1,4 +1,4 @@
-import React, { useState, ErrorInfo, ReactNode } from 'react';
+import React, { Component, useState, ErrorInfo, ReactNode } from 'react';
 import { Login } from './components/Login';
 import { Dashboard } from './components/Dashboard';
 import { AdminPanel } from './components/AdminPanel';
@@ -16,11 +16,14 @@ interface ErrorBoundaryState {
 }
 
 // Error Boundary Component
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-    public state: ErrorBoundaryState = {
-        hasError: false,
-        error: null
-    };
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+    constructor(props: ErrorBoundaryProps) {
+        super(props);
+        this.state = {
+            hasError: false,
+            error: null
+        };
+    }
 
     static getDerivedStateFromError(error: Error): ErrorBoundaryState {
         return { hasError: true, error };

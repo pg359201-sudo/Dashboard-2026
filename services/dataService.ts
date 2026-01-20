@@ -44,63 +44,80 @@ export const parseExcelFile = (file: File): Promise<SalesRecord[]> => {
 
 /**
  * DATABASE OPERATIONS (VERCEL BLOB)
- * We use the REST API directly since we are in a pure client-side environment.
+ * Improved for caching and error handling.
  */
 
 export const saveToStorage = async (data: SalesRecord[]): Promise<void> => {
-    // 1. Try Vercel Blob if token exists
+    // 1. Always save to LocalStorage first as immediate backup
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+
+    // 2. Try Vercel Blob if token exists
     if (BLOB_TOKEN) {
-        try {
-            console.log("Saving to Cloud Database (Vercel Blob)...");
-            const response = await fetch(`https://blob.vercel-storage.com/${DB_FILENAME}`, {
-                method: 'PUT',
-                headers: {
-                    'authorization': `Bearer ${BLOB_TOKEN}`,
-                    'x-add-random-suffix': 'false', // Keep filename constant to act as a DB
-                    'content-type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
+        console.log("Saving to Cloud Database (Vercel Blob)...");
+        const response = await fetch(`https://blob.vercel-storage.com/${DB_FILENAME}`, {
+            method: 'PUT',
+            headers: {
+                'authorization': `Bearer ${BLOB_TOKEN}`,
+                'x-add-random-suffix': 'false', // Attempt to overwrite/keep filename
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
 
-            if (!response.ok) throw new Error('Failed to upload to Blob');
-            console.log("Cloud Save Success");
-        } catch (error) {
-            console.error("Cloud Save Failed, falling back to local:", error);
+        if (!response.ok) {
+            // Re-throw error so AdminPanel knows it failed
+            const errorText = await response.text();
+            throw new Error(`Cloud Upload Failed: ${response.status} ${errorText}`);
         }
+        console.log("Cloud Save Success");
+    } else {
+        console.warn("No BLOB_TOKEN found. Data saved to LocalStorage only.");
     }
-
-    // 2. Always save to LocalStorage as cache/fallback
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-            resolve();
-        }, 500);
-    });
 };
 
 export const loadFromStorage = async (): Promise<SalesRecord[]> => {
     // 1. Try Vercel Blob first (Source of Truth)
     if (BLOB_TOKEN) {
         try {
-            // We need to list files to find the URL of our DB file, or construct it if public.
-            // For simplicity in this demo, we assume we can list the blob to get the latest url.
+            // List files. Add cache: 'no-store' to ensure we get the latest list.
             const listRes = await fetch(`https://blob.vercel-storage.com?limit=100`, {
                 method: 'GET',
                 headers: { 'authorization': `Bearer ${BLOB_TOKEN}` },
+                cache: 'no-store'
             });
             
             if (listRes.ok) {
                 const listData = await listRes.json();
-                const dbFile = listData.blobs.find((b: any) => b.pathname === DB_FILENAME);
                 
-                if (dbFile && dbFile.url) {
-                    console.log("Downloading from Cloud Database...", dbFile.url);
-                    const dbRes = await fetch(dbFile.url);
-                    const dbJson = await dbRes.json();
+                // Find the DB file. 
+                // Sort by uploadedAt (descending) to get the absolute latest version if duplicates exist.
+                const blobs = listData.blobs || [];
+                const dbFile = blobs
+                    .filter((b: any) => b.pathname.endsWith(DB_FILENAME))
+                    .sort((a: any, b: any) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+                    .pop(); // Use pop() if sorting asc, or logic above. Let's fix logic:
+                
+                // Correct Sort: Newest first
+                const latestFile = blobs
+                    .filter((b: any) => b.pathname.includes(DB_FILENAME))
+                    .sort((a: any, b: any) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+                    .reverse()[0];
+
+                if (latestFile && latestFile.url) {
+                    console.log("Downloading from Cloud Database...", latestFile.url);
                     
-                    // Update local cache
-                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbJson));
-                    return dbJson;
+                    // Add timestamp to query to BYPASS BROWSER CACHE
+                    const cacheBuster = `?t=${new Date().getTime()}`;
+                    const dbRes = await fetch(latestFile.url + cacheBuster, {
+                        cache: 'no-store'
+                    });
+                    
+                    if (dbRes.ok) {
+                        const dbJson = await dbRes.json();
+                        // Update local cache
+                        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbJson));
+                        return dbJson;
+                    }
                 }
             }
         } catch (error) {
@@ -109,13 +126,15 @@ export const loadFromStorage = async (): Promise<SalesRecord[]> => {
     }
 
     // 2. Fallback to LocalStorage
-    return new Promise((resolve) => {
-        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (stored) {
-            resolve(JSON.parse(stored));
-        } else {
-            console.log("No data found, using MOCK_DATA");
-            resolve(MOCK_DATA);
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {
+            console.error("Local storage corrupted");
         }
-    });
+    }
+
+    console.log("No data found, using MOCK_DATA");
+    return MOCK_DATA;
 };
