@@ -351,10 +351,23 @@ const KpiCard: React.FC<{ title: string, value: string, icon: React.ReactNode, t
 const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Helper to calculate percentage safe from NaN/Infinity
-    const getCatShare = (vol: number) => {
-        if (!client.UC12mm || client.UC12mm === 0) return '0.0%';
-        return ((vol / client.UC12mm) * 100).toFixed(1) + '%';
+    // Helper to calculate percentage and determine color
+    const renderShareItem = (label: string, vol: number) => {
+        const total = client.UC12mm || 0;
+        const percent = total > 0 ? (vol / total) * 100 : 0;
+        const displayValue = percent.toFixed(1) + '%';
+        
+        // If the percentage rounds to 0.0 or is effectively 0, color it red
+        const isZero = percent < 0.05; 
+
+        return (
+            <div>
+                <span className="text-[9px] uppercase tracking-wide text-slate-400 block">{label}</span>
+                <span className={`text-xs font-semibold ${isZero ? 'text-red-500' : 'text-slate-700'}`}>
+                    {displayValue}
+                </span>
+            </div>
+        );
     };
 
     return (
@@ -407,26 +420,11 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                         {/* New Category Mix Section */}
                         <div className="col-span-2 pt-2 border-t border-slate-100 border-dashed mt-1">
                              <div className="grid grid-cols-3 gap-y-2 gap-x-1">
-                                <div>
-                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Aguas</span>
-                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolAgua)}</span>
-                                </div>
-                                <div>
-                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Jugos</span>
-                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolJugos)}</span>
-                                </div>
-                                <div>
-                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Energy</span>
-                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolEnergizantes)}</span>
-                                </div>
-                                <div>
-                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Spirits</span>
-                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolSpirits)}</span>
-                                </div>
-                                <div>
-                                    <span className="text-[9px] uppercase tracking-wide text-slate-400 block">Vinos</span>
-                                    <span className="text-xs font-semibold text-slate-700">{getCatShare(client.VolVinos)}</span>
-                                </div>
+                                {renderShareItem('Aguas', client.VolAgua)}
+                                {renderShareItem('Jugos', client.VolJugos)}
+                                {renderShareItem('Energy', client.VolEnergizantes)}
+                                {renderShareItem('Spirits', client.VolSpirits)}
+                                {renderShareItem('Vinos', client.VolVinos)}
                             </div>
                         </div>
                     </div>
