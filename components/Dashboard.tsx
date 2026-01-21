@@ -449,6 +449,19 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                                 {(client.Var2025vs2024 * 100).toFixed(1)}%
                             </span>
                         </div>
+                        
+                        {/* New TP Section */}
+                        <div>
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">TP</span>
+                            <span className="font-medium text-slate-700">{client.TP ? client.TP.toFixed(2) : '0.00'}</span>
+                        </div>
+                        <div>
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">TP RED</span>
+                            <span className="font-medium text-slate-700">
+                                {client.TP_RED ? (client.TP_RED * 100).toFixed(1) : '0.0'}%
+                            </span>
+                        </div>
+
                         <div className="col-span-2">
                             <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-1">Share Refrescos</span>
                             <div className="flex items-center gap-2">

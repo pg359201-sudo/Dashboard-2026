@@ -9,6 +9,7 @@ export interface SalesRecord {
     Var2025vs2024: number; // Growth percentage
     ShareREFRESCOS: number; // Market Share
     TP: number; // Average Ticket Price (Ticket Promedio)
+    TP_RED: number; // Ticket Promedio Red
     
     // New breakdown categories
     VolColas: number;

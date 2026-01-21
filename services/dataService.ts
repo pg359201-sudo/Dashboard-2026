@@ -17,6 +17,7 @@ const sanitizeData = (rawData: any[]): SalesRecord[] => {
         Var2025vs2024: Number(row['Var 2025 vs 2024'] || row['Crecimiento'] || 0),
         ShareREFRESCOS: Number(row['Share REFRESCOS'] || row['Share'] || 0),
         TP: Number(row['TP'] || 0),
+        TP_RED: Number(row['TP RED'] || row['TP_RED'] || 0),
 
         // Parsing detailed product categories based on header image
         VolColas: Number(row['COLAS'] || 0),
