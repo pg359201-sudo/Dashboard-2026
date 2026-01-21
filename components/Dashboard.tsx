@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { SalesRecord, FilterState } from '../types';
 import { 
-    BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, Treemap
+    Treemap, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { ChevronDown, ChevronUp, Filter, TrendingUp, TrendingDown, DollarSign, Package, FileWarning, RefreshCw } from 'lucide-react';
+import { ChevronDown, Filter, TrendingUp, TrendingDown, DollarSign, Package, FileWarning, RefreshCw, AlertCircle, Award } from 'lucide-react';
 import { COLORS } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 import { loadFromStorage } from '../services/dataService';
@@ -108,9 +108,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
         return { totalVol, totalGrowth, avgShare };
     }, [filteredData]);
 
-    // Chart Data Preparation
-    const chartsData = useMemo(() => {
-        if (filteredData.length === 0) return { topClientsData: [], productMixData: [] };
+    // Data Preparation (Charts & Lists)
+    const processedData = useMemo(() => {
+        if (filteredData.length === 0) return { topClientsData: [], winners: [], losers: [] };
         
         // 1. Top 10 Clients by Volume (Treemap Data)
         const topClientsData = filteredData
@@ -118,25 +118,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
             .sort((a, b) => b.value - a.value)
             .slice(0, 10);
 
-        // 2. Product Mix Data (Columns from Excel)
-        const categories = [
-            { key: 'VolColas', label: 'Colas' },
-            { key: 'VolSabores', label: 'Sabores' },
-            { key: 'VolAgua', label: 'Agua' },
-            { key: 'VolSaborizadas', label: 'Saborizadas' },
-            { key: 'VolJugos', label: 'Jugos' },
-            { key: 'VolIsotonico', label: 'Isotónico' },
-            { key: 'VolEnergizantes', label: 'Energy' },
-            { key: 'VolSpirits', label: 'Spirits' },
-            { key: 'VolVinos', label: 'Vinos' },
-        ];
+        // 2. Winners & Losers (Growth)
+        // Sort by Growth Descending (Winners)
+        const winners = [...filteredData]
+            .sort((a, b) => (b.Var2025vs2024 || 0) - (a.Var2025vs2024 || 0))
+            .slice(0, 5);
+            
+        // Sort by Growth Ascending (Losers)
+        const losers = [...filteredData]
+            .sort((a, b) => (a.Var2025vs2024 || 0) - (b.Var2025vs2024 || 0))
+            .slice(0, 5);
 
-        const productMixData = categories.map(cat => {
-            const total = filteredData.reduce((acc, curr) => acc + (Number(curr[cat.key as keyof SalesRecord]) || 0), 0);
-            return { name: cat.label, value: total };
-        }).filter(item => item.value > 0).sort((a, b) => b.value - a.value);
-
-        return { topClientsData, productMixData };
+        return { topClientsData, winners, losers };
     }, [filteredData]);
 
     const handleFilterChange = (key: keyof FilterState, value: string) => {
@@ -244,7 +237,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                     />
                 </div>
 
-                {/* Charts */}
+                {/* Charts & Lists Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Top Clients Treemap */}
                     <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
@@ -254,7 +247,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
                                 <Treemap
-                                    data={chartsData.topClientsData}
+                                    data={processedData.topClientsData}
                                     dataKey="value"
                                     aspectRatio={4 / 3}
                                     stroke="#fff"
@@ -270,36 +263,81 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         </div>
                     </div>
 
-                    {/* Product Mix Bar Chart */}
+                    {/* Winners & Losers Panel (Replaces Product Mix) */}
                     <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                        <h3 className="text-sm font-bold text-slate-700 mb-4">Mix de Productos (Volumen UC)</h3>
-                        <div className="h-64">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart 
-                                    layout="vertical"
-                                    data={chartsData.productMixData} 
-                                    margin={{ top: 0, right: 30, left: 40, bottom: 0 }}
-                                >
-                                    <XAxis type="number" hide />
-                                    <YAxis 
-                                        type="category" 
-                                        dataKey="name" 
-                                        width={80} 
-                                        tick={{fontSize: 10, fill: '#64748b'}} 
-                                        interval={0}
-                                    />
-                                    <RechartsTooltip 
-                                        cursor={{ fill: '#f8fafc' }}
-                                        formatter={(value: any) => [Number(value).toLocaleString(), 'Volumen']}
-                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                    />
-                                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
-                                        {chartsData.productMixData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
+                        <h3 className="text-sm font-bold text-slate-700 mb-4">Ranking de Desempeño (Crecimiento)</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
+                            
+                            {/* Winners */}
+                            <div className="flex flex-col h-full">
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-green-100">
+                                    <Award className="h-4 w-4 text-green-600" />
+                                    <span className="text-xs font-bold text-green-700 uppercase tracking-wide">Top 5 Ganadores</span>
+                                </div>
+                                <div className="space-y-3 flex-1">
+                                    {processedData.winners.length > 0 ? (
+                                        processedData.winners.map((client, idx) => (
+                                            <div key={client.id} className="flex justify-between items-center group">
+                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                    <span className="flex-shrink-0 w-5 h-5 bg-green-50 text-green-700 rounded-full flex items-center justify-center text-[10px] font-bold">
+                                                        {idx + 1}
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <div className="text-xs font-semibold text-slate-700 truncate" title={client.RazonSocial}>
+                                                            {client.RazonSocial.length > 15 ? client.RazonSocial.substring(0, 15) + '...' : client.RazonSocial}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-400">{Number(client.UC12mm).toLocaleString()} UC</div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md ml-2">
+                                                    +{(client.Var2025vs2024 * 100).toFixed(1)}%
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-4">
+                                            <Award className="h-6 w-6 mb-1 opacity-20" />
+                                            Sin crecimiento positivo
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Losers */}
+                            <div className="flex flex-col h-full">
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-red-100">
+                                    <AlertCircle className="h-4 w-4 text-red-600" />
+                                    <span className="text-xs font-bold text-red-700 uppercase tracking-wide">Top 5 Críticos</span>
+                                </div>
+                                <div className="space-y-3 flex-1">
+                                    {processedData.losers.length > 0 ? (
+                                        processedData.losers.map((client, idx) => (
+                                            <div key={client.id} className="flex justify-between items-center group">
+                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                    <span className="flex-shrink-0 w-5 h-5 bg-red-50 text-red-700 rounded-full flex items-center justify-center text-[10px] font-bold">
+                                                        {idx + 1}
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <div className="text-xs font-semibold text-slate-700 truncate" title={client.RazonSocial}>
+                                                            {client.RazonSocial.length > 15 ? client.RazonSocial.substring(0, 15) + '...' : client.RazonSocial}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-400">{Number(client.UC12mm).toLocaleString()} UC</div>
+                                                    </div>
+                                                </div>
+                                                <div className={`text-xs font-bold px-2 py-1 rounded-md ml-2 ${client.Var2025vs2024 < 0 ? 'text-red-600 bg-red-50' : 'text-slate-500 bg-slate-100'}`}>
+                                                    {(client.Var2025vs2024 * 100).toFixed(1)}%
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-4">
+                                            <AlertCircle className="h-6 w-6 mb-1 opacity-20" />
+                                            Sin registros críticos
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
