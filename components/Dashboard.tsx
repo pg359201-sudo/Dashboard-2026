@@ -119,13 +119,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
             .slice(0, 10);
 
         // 2. Winners & Losers (Growth)
+        // FILTER: Only show clients where GEC contains "ORO" or "DIAMANTE"
+        const vipClients = filteredData.filter(d => {
+            const gec = (d.GEC || '').toUpperCase();
+            return gec.includes('ORO') || gec.includes('DIAMANTE');
+        });
+
         // Sort by Growth Descending (Winners)
-        const winners = [...filteredData]
+        const winners = [...vipClients]
             .sort((a, b) => (b.Var2025vs2024 || 0) - (a.Var2025vs2024 || 0))
             .slice(0, 5);
             
         // Sort by Growth Ascending (Losers)
-        const losers = [...filteredData]
+        const losers = [...vipClients]
             .sort((a, b) => (a.Var2025vs2024 || 0) - (b.Var2025vs2024 || 0))
             .slice(0, 5);
 
@@ -265,7 +271,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
 
                     {/* Winners & Losers Panel (Replaces Product Mix) */}
                     <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                        <h3 className="text-sm font-bold text-slate-700 mb-4">Ranking de Desempeño (Crecimiento)</h3>
+                        <div className="mb-4">
+                            <h3 className="text-sm font-bold text-slate-700">Ranking Oro / Diamante</h3>
+                            <p className="text-[10px] text-slate-400">Filtrado por GEC: "ORO" o "DIAMANTE"</p>
+                        </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
                             
                             {/* Winners */}
@@ -295,9 +304,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-4">
+                                        <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-4 text-center">
                                             <Award className="h-6 w-6 mb-1 opacity-20" />
-                                            Sin crecimiento positivo
+                                            Sin clientes Oro/Diamante<br/>con crecimiento positivo
                                         </div>
                                     )}
                                 </div>
@@ -330,9 +339,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-4">
+                                        <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-4 text-center">
                                             <AlertCircle className="h-6 w-6 mb-1 opacity-20" />
-                                            Sin registros críticos
+                                            Sin registros críticos<br/>en segmento Oro/Diamante
                                         </div>
                                     )}
                                 </div>
