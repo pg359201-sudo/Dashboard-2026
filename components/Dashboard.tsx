@@ -109,8 +109,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
             : 0;
             
         // Share Refrescos: Average of clients with Share > 0
-        // User request: "tomar todos los clientes que tengan este valor para hacer el promedio entre ellos"
-        const clientsWithShare = filteredData.filter(d => (d.ShareREFRESCOS || 0) > 0);
+        // We filter out any record with 0 share to avoid skewing the average downwards
+        const clientsWithShare = filteredData.filter(d => (d.ShareREFRESCOS || 0) > 0.0001);
         const avgShare = clientsWithShare.length > 0
             ? clientsWithShare.reduce((acc, curr) => acc + (curr.ShareREFRESCOS || 0), 0) / clientsWithShare.length
             : 0;
@@ -466,7 +466,7 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                             <span className="font-medium text-slate-700">{client.TP ? client.TP.toFixed(2) : '0.00'}</span>
                         </div>
                         <div>
-                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">TP RED</span>
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">TP %</span>
                             <span className="font-medium text-slate-700">
                                 {client.TP_RED ? (client.TP_RED * 100).toFixed(1) : '0.0'}%
                             </span>

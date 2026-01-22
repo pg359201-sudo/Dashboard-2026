@@ -16,8 +16,10 @@ const sanitizeData = (rawData: any[]): SalesRecord[] => {
         UC12mm: Number(row['UC 12mm'] || row['Volumen'] || 0),
         Var2025vs2024: Number(row['Var 2025 vs 2024'] || row['Crecimiento'] || 0),
         ShareREFRESCOS: Number(row['Share REFRESCOS'] || row['Share'] || 0),
-        TP: Number(row['TP'] || 0),
-        TP_RED: Number(row['TP RED'] || row['TP_RED'] || 0),
+        
+        // Robust parsing for TP fields with multiple aliases
+        TP: Number(row['TP'] || row['Ticket Promedio'] || row['Ticket'] || 0),
+        TP_RED: Number(row['TP RED'] || row['TP_RED'] || row['TP %'] || row['% TP'] || row['TP Red'] || 0),
 
         // Parsing detailed product categories based on header image
         VolColas: Number(row['COLAS'] || 0),
