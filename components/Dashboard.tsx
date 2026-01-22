@@ -3,7 +3,7 @@ import { SalesRecord, FilterState } from '../types';
 import { 
     Treemap, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { ChevronDown, Filter, TrendingUp, TrendingDown, DollarSign, Package, FileWarning, RefreshCw, AlertCircle, Award } from 'lucide-react';
+import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart } from 'lucide-react';
 import { COLORS } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 import { loadFromStorage } from '../services/dataService';
@@ -100,10 +100,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
     // KPI Calculations
     const kpis = useMemo(() => {
         if (filteredData.length === 0) return { totalVol: 0, totalGrowth: 0, avgShare: 0 };
+        
         const totalVol = filteredData.reduce((acc, curr) => acc + (curr.UC12mm || 0), 0);
-        // Weighted average for growth based on volume
-        const totalGrowth = filteredData.reduce((acc, curr) => acc + ((curr.Var2025vs2024 || 0) * (curr.UC12mm || 0)), 0) / (totalVol || 1);
-        const avgShare = filteredData.reduce((acc, curr) => acc + (curr.ShareREFRESCOS || 0), 0) / (filteredData.length || 1);
+        
+        // Growth: Weighted average based on volume
+        const totalGrowth = totalVol > 0 
+            ? filteredData.reduce((acc, curr) => acc + ((curr.Var2025vs2024 || 0) * (curr.UC12mm || 0)), 0) / totalVol 
+            : 0;
+            
+        // Share Refrescos: Average of clients with Share > 0
+        // User request: "tomar todos los clientes que tengan este valor para hacer el promedio entre ellos"
+        const clientsWithShare = filteredData.filter(d => (d.ShareREFRESCOS || 0) > 0);
+        const avgShare = clientsWithShare.length > 0
+            ? clientsWithShare.reduce((acc, curr) => acc + (curr.ShareREFRESCOS || 0), 0) / clientsWithShare.length
+            : 0;
         
         return { totalVol, totalGrowth, avgShare };
     }, [filteredData]);
@@ -236,9 +246,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         isPercent
                     />
                     <KpiCard 
-                        title="Share Refrescos" 
+                        title="Share Refrescos Promedio" 
                         value={`${(kpis.avgShare * 100).toFixed(1)}%`} 
-                        icon={<DollarSign className="h-5 w-5 text-purple-600" />}
+                        icon={<PieChart className="h-5 w-5 text-purple-600" />}
                         trend={null}
                     />
                 </div>
