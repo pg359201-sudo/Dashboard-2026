@@ -12,7 +12,9 @@ const getValue = (row: any, keys: string[]): any => {
     const rowKeys = Object.keys(row);
     const normalizedRowKeys = rowKeys.reduce((acc, key) => {
         // Create a map where 'uc 12mm' -> 'UC 12mm' (original key)
-        acc[key.trim().toLowerCase()] = key; 
+        // Also remove extra spaces to be safe: 'uc 12mm ' -> 'uc12mm'
+        const cleanKey = key.trim().toLowerCase();
+        acc[cleanKey] = key; 
         return acc;
     }, {} as Record<string, string>);
 
@@ -105,7 +107,9 @@ const sanitizeData = (rawData: any[]): SalesRecord[] => {
 
         return {
             id: `row-${index}`,
-            RazonSocial: getValue(row, ['RazonSocial', 'Cliente', 'Nombre', 'Razon Social']) || 'Desconocido',
+            // Added RazonCliente to the list
+            RazonSocial: getValue(row, ['RazonCliente', 'RazonSocial', 'Cliente', 'Nombre', 'Razon Social']) || 'Desconocido',
+            // Added Sello to the list
             GEC: getValue(row, ['GEC', 'Clasificacion', 'Sello']) || 'Otros',
             GrupoCanal: getValue(row, ['GrupoCanal', 'Subcanal', 'Canal', 'Grupo Canal']) || 'Otros',
             RutaVenta: getValue(row, ['RutaVenta', 'Ruta', 'Codigo Ruta', 'Ruta Venta']) || 'S/R',

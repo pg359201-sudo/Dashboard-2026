@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2, Globe, ShieldAlert } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2, Globe, ShieldAlert, BarChart3, Users } from 'lucide-react';
 import { parseExcelFile, saveToStorage } from '../services/dataService';
+import { SalesRecord } from '../types';
 
 interface AdminPanelProps {
     onLogout: () => void;
@@ -10,6 +11,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
+    const [stats, setStats] = useState<{ count: number; totalVol: number } | null>(null);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -18,18 +20,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         setLoading(true);
         setStatus('idle');
         setMessage('');
+        setStats(null);
 
         try {
-            const data = await parseExcelFile(file);
+            const data: SalesRecord[] = await parseExcelFile(file);
+            
+            // Calculate stats for feedback
+            const count = data.length;
+            const totalVol = data.reduce((acc, item) => acc + (item.UC12mm || 0), 0);
+            
+            setStats({ count, totalVol });
+
+            if (count === 0) {
+                throw new Error("El archivo no contiene registros válidos.");
+            }
+
             await saveToStorage(data);
             setStatus('success');
-            setMessage(`Base de datos Global actualizada. ${data.length} registros sincronizados en la nube.`);
-        } catch (error) {
+            setMessage(`Base de datos actualizada correctamente.`);
+        } catch (error: any) {
             setStatus('error');
-            setMessage('Error al sincronizar con la nube. Verifique su conexión o el formato del archivo.');
+            setMessage(error.message || 'Error al procesar el archivo.');
             console.error(error);
         } finally {
             setLoading(false);
+            // Clear input so same file can be selected again if needed
+            e.target.value = '';
         }
     };
 
@@ -62,18 +78,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                     
                     <h2 className="text-2xl font-bold text-slate-900 mb-2">Actualizar Base de Datos Global</h2>
                     <p className="text-slate-500 mb-6 px-4">
-                        Suba el archivo Excel mensual. La información se sincronizará automáticamente en los dispositivos de 
-                        <span className="font-bold text-slate-700"> todos los vendedores</span>.
+                        Suba el archivo Excel mensual. La información se sincronizará automáticamente en los dispositivos de todos los vendedores.
                     </p>
 
                     <div className="bg-orange-50 border border-orange-100 rounded-lg p-3 mb-8 text-left flex gap-3">
                         <ShieldAlert className="h-5 w-5 text-orange-600 shrink-0 mt-0.5" />
                         <p className="text-xs text-orange-800 leading-relaxed">
-                            <strong>Atención:</strong> Esta acción sobrescribe la base de datos actual en la nube de forma irreversible. Asegúrese de que el archivo Excel es el correcto antes de continuar.
+                            <strong>Atención:</strong> Esta acción sobrescribe la base de datos actual en la nube. Asegúrese de que el formato de columnas sea el correcto (RazonCliente, UC 12mm, etc.).
                         </p>
                     </div>
 
-                    <div className="relative group">
+                    <div className="relative group mb-6">
                         <input
                             type="file"
                             accept=".xlsx, .xls"
@@ -85,8 +100,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                             {loading ? (
                                 <div className="flex flex-col items-center">
                                     <Loader2 className="animate-spin h-10 w-10 text-blue-600 mb-3" />
-                                    <span className="text-sm font-semibold text-slate-700">Subiendo a la nube...</span>
-                                    <span className="text-xs text-slate-400 mt-1">No cierre esta ventana</span>
+                                    <span className="text-sm font-semibold text-slate-700">Procesando y Subiendo...</span>
+                                    <span className="text-xs text-slate-400 mt-1">Por favor espere</span>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center">
@@ -94,19 +109,51 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                     <span className="text-sm font-bold text-slate-700">
                                         Seleccionar Archivo Excel
                                     </span>
-                                    <span className="text-xs text-slate-400 mt-1">Arrastre o haga clic para buscar</span>
+                                    <span className="text-xs text-slate-400 mt-1">Soporta .xlsx y .xls</span>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {status === 'success' && (
-                        <div className="mt-6 p-4 bg-green-50 border border-green-100 rounded-xl flex items-start gap-3 text-left animate-in fade-in slide-in-from-bottom-4 shadow-sm">
-                            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                            <div>
-                                <h3 className="text-sm font-bold text-green-800">Sincronización Exitosa</h3>
-                                <p className="text-sm text-green-700 mt-1">{message}</p>
+                    {/* Feedback Section */}
+                    {status === 'success' && stats && (
+                        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-4">
+                            <div className="p-4 bg-green-50 border border-green-100 rounded-xl flex items-center gap-3 text-left">
+                                <CheckCircle className="h-6 w-6 text-green-600 shrink-0" />
+                                <div>
+                                    <h3 className="text-sm font-bold text-green-800">Carga Exitosa</h3>
+                                    <p className="text-xs text-green-700">{message}</p>
+                                </div>
                             </div>
+
+                            {/* Stats Summary */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                    <div className="flex items-center gap-2 text-slate-500 mb-1">
+                                        <Users className="h-4 w-4" />
+                                        <span className="text-xs font-medium uppercase">Clientes</span>
+                                    </div>
+                                    <p className="text-xl font-bold text-slate-800">{stats.count}</p>
+                                </div>
+                                <div className={`p-3 rounded-lg border ${stats.totalVol === 0 ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
+                                    <div className={`flex items-center gap-2 mb-1 ${stats.totalVol === 0 ? 'text-red-500' : 'text-slate-500'}`}>
+                                        <BarChart3 className="h-4 w-4" />
+                                        <span className="text-xs font-medium uppercase">Volumen Total</span>
+                                    </div>
+                                    <p className={`text-xl font-bold ${stats.totalVol === 0 ? 'text-red-600' : 'text-slate-800'}`}>
+                                        {stats.totalVol.toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {stats.totalVol === 0 && (
+                                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-left flex gap-2">
+                                    <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+                                    <p className="text-xs text-red-700">
+                                        <strong>Advertencia:</strong> El volumen total detectado es 0. Esto indica que el sistema no pudo leer la columna "UC 12mm". Verifique que el archivo Excel tenga ese nombre de columna exacto y que los números no estén almacenados como texto ilegible.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     )}
 
