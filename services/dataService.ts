@@ -6,10 +6,13 @@ const LOCAL_STORAGE_KEY = 'sales_commander_data';
 
 // Helper to find value in row regardless of case or whitespace in key
 const getValue = (row: any, keys: string[]): any => {
-    // Normalize row keys once for performance could be better, but for this scale valid on fly
+    if (!row) return undefined;
+    
+    // Normalize row keys once per call (could be optimized but fine for <10k rows)
     const rowKeys = Object.keys(row);
     const normalizedRowKeys = rowKeys.reduce((acc, key) => {
-        acc[key.trim().toLowerCase()] = key; // Map "  uc 12mm " -> "uc 12mm" -> original key
+        // Create a map where 'uc 12mm' -> 'UC 12mm' (original key)
+        acc[key.trim().toLowerCase()] = key; 
         return acc;
     }, {} as Record<string, string>);
 
@@ -22,67 +25,117 @@ const getValue = (row: any, keys: string[]): any => {
     return undefined;
 };
 
-// Helper to parse numbers safely (handles strings with commas if necessary, though XLSX usually handles type)
-const parseNum = (val: any): number => {
-    if (typeof val === 'number') return val;
+/**
+ * Robust Number Parser for Latin/EU Formats (1.234,56)
+ * Handles:
+ * - "101.242" -> 101242 (Dot as thousand separator)
+ * - "61,9%" -> 0.619 (Comma as decimal, percentage handling)
+ * - "2,969" -> 2.969 (Comma as decimal)
+ * - Raw numbers
+ */
+const parseNum = (val: any, isPercentage: boolean = false): number => {
+    if (typeof val === 'number') {
+        // If Excel already parsed it as a number, we use it. 
+        // CAUTION: If Excel parsed "101.242" as 101.242 but meant 101k, this might still be low.
+        // However, usually XLSX parsing with default settings handles standard formats well if the cell category is Number.
+        // If the cell category is General/Text, we get strings.
+        return isPercentage && val > 1 ? val / 100 : val;
+    }
+    
     if (!val) return 0;
-    // Handle string numbers like "1,200.50" or "1.200,50" if they come as text
-    // Simple heuristic: remove non-numeric chars except dot and comma
-    const str = String(val).trim();
-    if (str === '') return 0;
-    // Attempt standard parse
-    const num = Number(str);
-    if (!isNaN(num)) return num;
-    return 0;
+    
+    let str = String(val).trim();
+    if (str === '' || str === '-') return 0;
+
+    // Handle Percentage Symbol
+    let isPercentValue = false;
+    if (str.includes('%')) {
+        str = str.replace('%', '');
+        isPercentValue = true;
+    }
+
+    // CLEANING LOGIC (LATAM/EU: Dot=Thousand, Comma=Decimal)
+    // 1. Remove all dots (thousands)
+    // 2. Replace comma with dot (decimal)
+    
+    // Heuristic: If string has dots but NO commas (e.g. "101.242"), assume dot is thousand separator 
+    // unless it looks like a small decimal (unlikely for Volumes). 
+    // Given the user screenshot, volumes are "101.242", "40.550". These are Integers.
+    
+    // Step 1: Remove thousands separator (.)
+    str = str.replace(/\./g, '');
+    
+    // Step 2: Replace decimal separator (,) with (.) for JS parsing
+    str = str.replace(',', '.');
+
+    let num = parseFloat(str);
+
+    if (isNaN(num)) return 0;
+
+    // Final adjustment for percentages
+    if (isPercentage || isPercentValue) {
+        // If we parsed "61.9" from "61,9%", we want 0.619 usually, or keep 61.9 depending on UI.
+        // The UI expects 0.XX for shares usually, but the screenshot shows "61,9%".
+        // Let's normalize: if > 1 and isPercentage, divide by 100.
+        if (num > 1) {
+            num = num / 100;
+        }
+    }
+
+    return num;
 };
 
 // Helper to sanitize keys from Excel
 const sanitizeData = (rawData: any[]): SalesRecord[] => {
     return rawData.map((row, index) => {
-        // Parse YTD values using fuzzy matching
-        const ytd25 = parseNum(getValue(row, ['2025 ytd', '2025 YTD', 'YTD 2025', 'Venta 2025', 'ytd25']));
-        const ytd26 = parseNum(getValue(row, ['2026 ytd', '2026 YTD', 'YTD 2026', 'Venta 2026', 'ytd26']));
+        // Debug first row to help identify mapping issues in console
+        if (index === 0) console.log("Sample Row Parsing:", row);
+
+        // Parse YTD values
+        const ytd25 = parseNum(getValue(row, ['2025 ytd', '2025 YTD', 'YTD 2025', 'Venta 2025', 'ytd25', 'ytd 25']));
+        const ytd26 = parseNum(getValue(row, ['2026 ytd', '2026 YTD', 'YTD 2026', 'Venta 2026', 'ytd26', 'ytd 26']));
         
         // Calculate Variation dynamically
-        // Formula: (2026 / 2025) - 1
         let calculatedVar = 0;
         if (ytd25 > 0) {
             calculatedVar = (ytd26 / ytd25) - 1;
         } else if (ytd26 > 0) {
-            calculatedVar = 1; // 100% growth if base was 0 but current is positive
+            calculatedVar = 1; // 100% growth
         }
 
         return {
             id: `row-${index}`,
-            RazonSocial: getValue(row, ['RazonSocial', 'Cliente', 'Nombre']) || 'Desconocido',
-            GEC: getValue(row, ['GEC', 'Clasificacion']) || 'Otros',
-            GrupoCanal: getValue(row, ['GrupoCanal', 'Subcanal', 'Canal']) || 'Otros',
-            RutaVenta: getValue(row, ['RutaVenta', 'Ruta', 'Codigo Ruta']) || 'S/R',
-            RutaDesarr: getValue(row, ['RutaDesarr', 'Desarrollador', 'Vendedor']) || 'S/D',
+            RazonSocial: getValue(row, ['RazonSocial', 'Cliente', 'Nombre', 'Razon Social']) || 'Desconocido',
+            GEC: getValue(row, ['GEC', 'Clasificacion', 'Sello']) || 'Otros',
+            GrupoCanal: getValue(row, ['GrupoCanal', 'Subcanal', 'Canal', 'Grupo Canal']) || 'Otros',
+            RutaVenta: getValue(row, ['RutaVenta', 'Ruta', 'Codigo Ruta', 'Ruta Venta']) || 'S/R',
+            RutaDesarr: getValue(row, ['RutaDesarr', 'Desarrollador', 'Vendedor', 'Ruta Desarr']) || 'S/D',
             
-            UC12mm: parseNum(getValue(row, ['UC 12mm', 'Volumen', 'UC', 'Venta Anual'])),
+            // VOLUMES (Assume integers, remove dots)
+            UC12mm: parseNum(getValue(row, ['UC 12mm', 'Volumen', 'UC', 'Venta Anual', 'uc12mm'])),
             
             // Map new fields
             YTD2025: ytd25,
             YTD2026: ytd26,
             Var2025vs2024: calculatedVar,
 
-            ShareREFRESCOS: parseNum(getValue(row, ['Share REFRESCOS', 'Share', 'Part. Mercado'])),
+            // SHARE (Handle %)
+            ShareREFRESCOS: parseNum(getValue(row, ['Share REFRESCOS', 'Share', 'Part. Mercado', 'share refrescos']), true),
             
-            // Robust parsing for TP fields with multiple aliases
+            // PRICES (Handle decimals with comma)
             TP: parseNum(getValue(row, ['TP', 'Ticket Promedio', 'Ticket'])),
-            TP_RED: parseNum(getValue(row, ['TP RED', 'TP_RED', 'TP %', '% TP', 'TP Red'])),
+            TP_RED: parseNum(getValue(row, ['TP RED', 'TP_RED', 'TP %', '% TP', 'TP Red']), true), // Often a % or decimal
 
-            // Parsing detailed product categories based on header image
-            VolColas: parseNum(getValue(row, ['COLAS', 'Vol Colas'])),
-            VolSabores: parseNum(getValue(row, ['SABORES', 'Vol Sabores'])),
-            VolAgua: parseNum(getValue(row, ['AGUA PLAIN', 'AGUA', 'Vol Agua'])),
-            VolSaborizadas: parseNum(getValue(row, ['SABORIZADAS', 'Vol Saborizadas'])),
-            VolJugos: parseNum(getValue(row, ['JUGOS', 'Vol Jugos'])),
-            VolIsotonico: parseNum(getValue(row, ['ISOTÓNICO', 'ISOTONICO', 'Vol Isotonico'])),
-            VolEnergizantes: parseNum(getValue(row, ['ENERGIZANTES', 'Vol Energizantes'])),
-            VolSpirits: parseNum(getValue(row, ['SPIRITS', 'Vol Spirits'])),
-            VolVinos: parseNum(getValue(row, ['VINOS', 'Vol Vinos']))
+            // CATEGORIES
+            VolColas: parseNum(getValue(row, ['COLAS', 'Vol Colas', 'colas'])),
+            VolSabores: parseNum(getValue(row, ['SABORES', 'Vol Sabores', 'sabores'])),
+            VolAgua: parseNum(getValue(row, ['AGUA PLAIN', 'AGUA', 'Vol Agua', 'agua plain'])),
+            VolSaborizadas: parseNum(getValue(row, ['SABORIZADAS', 'Vol Saborizadas', 'saborizadas'])),
+            VolJugos: parseNum(getValue(row, ['JUGOS', 'Vol Jugos', 'jugos'])),
+            VolIsotonico: parseNum(getValue(row, ['ISOTÓNICO', 'ISOTONICO', 'Vol Isotonico', 'isotonico', 'isotónico'])),
+            VolEnergizantes: parseNum(getValue(row, ['ENERGIZANTES', 'Vol Energizantes', 'energizantes'])),
+            VolSpirits: parseNum(getValue(row, ['SPIRITS', 'Vol Spirits', 'spirits'])),
+            VolVinos: parseNum(getValue(row, ['VINOS', 'Vol Vinos', 'vinos']))
         };
     });
 };
@@ -96,7 +149,16 @@ export const parseExcelFile = (file: File): Promise<SalesRecord[]> => {
                 const workbook = XLSX.read(data, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
+                
+                // Use raw: false to try to get formatted strings (which helps if Excel formatted them as 1.000)
+                // However, sheet_to_json often works best with raw values.
+                // Let's stick to default but handle the output strings in `sanitizeData`
                 const jsonData = XLSX.utils.sheet_to_json(sheet);
+                
+                if (jsonData.length === 0) {
+                    throw new Error("El archivo parece estar vacío o no se pudo leer la primera hoja.");
+                }
+
                 const sanitized = sanitizeData(jsonData);
                 resolve(sanitized);
             } catch (error) {
@@ -120,7 +182,6 @@ export const saveToStorage = async (data: SalesRecord[]): Promise<void> => {
         console.log("Starting Cloud Sync via Server API...");
         
         // Use the existing API endpoint to handle the upload server-side
-        // This avoids 404s from missing /api/upload routes for client-side upload handling
         const response = await fetch('/api/sales', {
             method: 'POST',
             headers: {
@@ -147,7 +208,6 @@ export const loadFromStorage = async (forceCloud: boolean = false): Promise<Sale
     try {
         console.log("Fetching fresh data from Cloud API...");
         // CRITICAL: We add ?_t=TIMESTAMP to the URL.
-        // This forces the browser to treat it as a brand new request, ignoring its local cache.
         const response = await fetch(`/api/sales?_t=${new Date().getTime()}`, {
             method: 'GET',
             headers: {
@@ -172,7 +232,6 @@ export const loadFromStorage = async (forceCloud: boolean = false): Promise<Sale
     }
 
     // 2. Fallback to LocalStorage if API fails or is offline
-    // Only use fallback if we are NOT strictly forcing a cloud refresh
     if (!forceCloud) {
         const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (stored) {
