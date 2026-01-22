@@ -50,95 +50,6 @@ const CustomizedTreemapContent = (props: any) => {
     );
 };
 
-interface KpiCardProps {
-    title: string;
-    value: string;
-    icon: React.ReactNode;
-    trend: number | null;
-    isPercent?: boolean;
-}
-
-const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon, trend, isPercent }) => {
-    let trendColor = 'text-slate-400';
-    let trendIcon = null;
-
-    if (trend !== null) {
-        if (trend > 0) {
-            trendColor = 'text-green-600';
-            trendIcon = <TrendingUp className="h-3 w-3" />;
-        } else if (trend < 0) {
-            trendColor = 'text-red-600';
-            trendIcon = <TrendingDown className="h-3 w-3" />;
-        }
-    }
-
-    return (
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{title}</span>
-                <div className="p-2 bg-slate-50 rounded-lg">
-                    {icon}
-                </div>
-            </div>
-            <div className="flex items-end gap-2">
-                <span className="text-2xl font-bold text-slate-800">{value}</span>
-                {trend !== null && (
-                    <span className={`flex items-center gap-1 text-xs font-bold mb-1 ${trendColor} bg-slate-50 px-2 py-0.5 rounded`}>
-                        {trendIcon}
-                        {trend > 0 ? '+' : ''}{isPercent ? (trend * 100).toFixed(1) + '%' : trend}
-                    </span>
-                )}
-            </div>
-        </div>
-    );
-};
-
-interface ClientRowProps {
-    client: SalesRecord;
-}
-
-const ClientRow: React.FC<ClientRowProps> = ({ client }) => {
-    return (
-        <div className="px-5 py-4 hover:bg-slate-50 transition-colors flex items-center justify-between group cursor-default">
-            <div className="flex items-center gap-3 overflow-hidden flex-1">
-                <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0 border border-blue-100">
-                    {client.RazonSocial.substring(0, 2).toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                    <div className="text-sm font-semibold text-slate-700 truncate" title={client.RazonSocial}>
-                        {client.RazonSocial}
-                    </div>
-                    <div className="text-xs text-slate-400 flex gap-2 items-center">
-                        <span className="bg-slate-100 px-1.5 rounded text-[10px] font-medium">{client.GEC}</span>
-                        <span>•</span>
-                        <span className="truncate">{client.RutaVenta}</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div className="flex items-center gap-6 text-right shrink-0 ml-4">
-                <div className="hidden sm:block">
-                    <div className="text-[10px] uppercase text-slate-400 font-bold">Volumen</div>
-                    <div className="text-sm font-bold text-slate-700">{Number(client.UC12mm).toLocaleString()}</div>
-                </div>
-                
-                <div className="hidden sm:block w-20">
-                    <div className="text-[10px] uppercase text-slate-400 font-bold">Growth</div>
-                    <div className={`text-sm font-bold ${(client.Var2025vs2024 || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {(client.Var2025vs2024 || 0) > 0 ? '+' : ''}{((client.Var2025vs2024 || 0) * 100).toFixed(1)}%
-                    </div>
-                </div>
-
-                <div className="w-16 flex justify-end">
-                     <div className={`text-xs font-bold px-2 py-1 rounded-md ${(client.ShareREFRESCOS || 0) > 0.5 ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
-                        {((client.ShareREFRESCOS || 0) * 100).toFixed(0)}%
-                     </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogout }) => {
     const [localData, setLocalData] = useState<SalesRecord[]>(initialData || []);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -371,7 +282,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         </div>
                     </div>
 
-                    {/* Winners & Losers Panel (Replaces Product Mix) */}
+                    {/* Winners & Losers Panel */}
                     <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                         <div className="mb-4">
                             <h3 className="text-sm font-bold text-slate-700">Ranking Oro / Diamante</h3>
@@ -462,4 +373,136 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         </span>
                     </div>
                     <div className="divide-y divide-slate-100">
-                        {
+                        {filteredData.slice(0, 50).map((client) => (
+                            <ClientRow key={client.id} client={client} />
+                        ))}
+                        {filteredData.length > 50 && (
+                            <div className="p-4 text-center text-sm text-slate-500 bg-slate-50">
+                                Mostrando primeros 50 registros. Use los filtros superiores para ver más.
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </main>
+
+            <ChatAssistant data={filteredData} />
+        </div>
+    );
+};
+
+const KpiCard: React.FC<{ title: string, value: string, icon: React.ReactNode, trend: number | null, isPercent?: boolean }> = ({ title, value, icon, trend, isPercent }) => (
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-start justify-between hover:shadow-md transition-shadow">
+        <div>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{title}</p>
+            <h4 className="text-2xl font-bold text-slate-900 mt-1">{value}</h4>
+            {trend !== null && (
+                <div className={`text-xs mt-2 font-medium flex items-center gap-1 ${trend >= 0 ? 'text-green-600 bg-green-50 px-2 py-0.5 rounded-full inline-flex' : 'text-red-600 bg-red-50 px-2 py-0.5 rounded-full inline-flex'}`}>
+                    {trend >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    <span>{trend >= 0 ? '+' : ''}{isPercent ? (trend * 100).toFixed(1) + '%' : trend} vs Año Ant.</span>
+                </div>
+            )}
+        </div>
+        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+            {icon}
+        </div>
+    </div>
+);
+
+const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Helper to calculate percentage and determine color
+    const renderShareItem = (label: string, vol: number) => {
+        const total = client.UC12mm || 0;
+        const percent = total > 0 ? (vol / total) * 100 : 0;
+        const displayValue = percent.toFixed(1) + '%';
+        
+        // If the percentage rounds to 0.0 or is effectively 0, color it red
+        const isZero = percent < 0.05; 
+
+        return (
+            <div>
+                <span className="text-[9px] uppercase tracking-wide text-slate-400 block">{label}</span>
+                <span className={`text-xs font-semibold ${isZero ? 'text-red-500' : 'text-slate-700'}`}>
+                    {displayValue}
+                </span>
+            </div>
+        );
+    };
+
+    return (
+        <div className="group transition-colors hover:bg-slate-50">
+            <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full text-left px-5 py-4 flex items-center justify-between"
+            >
+                <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${client.Var2025vs2024 >= 0 ? 'bg-green-500' : 'bg-red-500'}`}>
+                        {client.RazonSocial.charAt(0)}
+                    </div>
+                    <div>
+                        <div className="font-semibold text-slate-800 text-sm">{client.RazonSocial}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Vol: <strong>{client.UC12mm.toLocaleString()} UC</strong></div>
+                    </div>
+                </div>
+                <div className={`p-1 rounded-full bg-slate-100 text-slate-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+                    <ChevronDown className="h-4 w-4" />
+                </div>
+            </button>
+            {isOpen && (
+                <div className="px-5 pb-4 pl-16 text-sm">
+                    <div className="grid grid-cols-2 gap-y-3 gap-x-6 pt-2 border-t border-slate-100">
+                        <div>
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">Ruta Venta</span>
+                            <span className="font-medium text-slate-700">{client.RutaVenta}</span>
+                        </div>
+                        <div>
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">Var YTD</span>
+                            <span className={`font-medium ${client.Var2025vs2024 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {(client.Var2025vs2024 * 100).toFixed(1)}%
+                            </span>
+                        </div>
+                        
+                        {/* New TP Section */}
+                        <div>
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">TP</span>
+                            <span className="font-medium text-slate-700">{client.TP ? client.TP.toFixed(2) : '0.00'}</span>
+                        </div>
+                        <div>
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">TP %</span>
+                            <span className="font-medium text-slate-700">
+                                {client.TP_RED ? (client.TP_RED * 100).toFixed(1) : '0.0'}%
+                            </span>
+                        </div>
+
+                        <div className="col-span-2">
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-1">Share Refrescos</span>
+                            <div className="flex items-center gap-2">
+                                <div className="w-full bg-slate-100 rounded-full h-2">
+                                    <div 
+                                        className="bg-blue-600 h-2 rounded-full transition-all duration-500" 
+                                        style={{ width: `${Math.min(client.ShareREFRESCOS * 100, 100)}%` }}
+                                    ></div>
+                                </div>
+                                <span className="text-xs font-bold text-slate-700 w-10 text-right">
+                                    {(client.ShareREFRESCOS * 100).toFixed(0)}%
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* New Category Mix Section */}
+                        <div className="col-span-2 pt-2 border-t border-slate-100 border-dashed mt-1">
+                             <div className="grid grid-cols-3 gap-y-2 gap-x-1">
+                                {renderShareItem('Aguas', client.VolAgua)}
+                                {renderShareItem('Jugos', client.VolJugos)}
+                                {renderShareItem('Energy', client.VolEnergizantes)}
+                                {renderShareItem('Spirits', client.VolSpirits)}
+                                {renderShareItem('Vinos', client.VolVinos)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
