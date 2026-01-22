@@ -20,7 +20,8 @@ export const generateSalesAnalysis = async (
 
         const systemInstruction = `Eres un analista de ventas experto para la app SalesComander Pro.
         Responde basándote estrictamente en los datos adjuntos en formato JSON.
-        Los datos representan clientes, volumen (UC 12mm), crecimiento (Var 2025 vs 2024), share y ticket promedio (TP).
+        Los datos representan clientes, volumen anual (UC 12mm), volumen YTD 2025 y YTD 2026.
+        La columna 'Var2025vs2024' representa el crecimiento YTD (Var YTD) calculado entre 2026 vs 2025.
         
         Si te preguntan por totales, calcula la suma de los datos proporcionados.
         Sé conciso, profesional y usa formato Markdown para resaltar números clave.`;

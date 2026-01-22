@@ -101,15 +101,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
     const kpis = useMemo(() => {
         if (filteredData.length === 0) return { totalVol: 0, totalGrowth: 0, avgShare: 0 };
         
+        // 1. Total UC 12mm
         const totalVol = filteredData.reduce((acc, curr) => acc + (curr.UC12mm || 0), 0);
         
-        // Growth: Weighted average based on volume
-        const totalGrowth = totalVol > 0 
-            ? filteredData.reduce((acc, curr) => acc + ((curr.Var2025vs2024 || 0) * (curr.UC12mm || 0)), 0) / totalVol 
-            : 0;
+        // 2. Growth (Var YTD) Calculation
+        // New Logic: Sum of YTD 2026 vs Sum of YTD 2025
+        const sumYTD2025 = filteredData.reduce((acc, curr) => acc + (curr.YTD2025 || 0), 0);
+        const sumYTD2026 = filteredData.reduce((acc, curr) => acc + (curr.YTD2026 || 0), 0);
+        
+        // If 2025 base is 0, we can't calculate growth (or it's infinite). We handle it safely.
+        const totalGrowth = sumYTD2025 > 0 ? (sumYTD2026 / sumYTD2025) - 1 : 0;
             
-        // Share Refrescos: Average of clients with Share > 0
-        // We filter out any record with 0 share to avoid skewing the average downwards
+        // 3. Share Refrescos: Average of clients with Share > 0
         const clientsWithShare = filteredData.filter(d => (d.ShareREFRESCOS || 0) > 0.0001);
         const avgShare = clientsWithShare.length > 0
             ? clientsWithShare.reduce((acc, curr) => acc + (curr.ShareREFRESCOS || 0), 0) / clientsWithShare.length
@@ -239,7 +242,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         trend={null}
                     />
                     <KpiCard 
-                        title="Crecimiento '25 vs '24" 
+                        title="Var YTD (26 vs 25)" 
                         value={`${(kpis.totalGrowth * 100).toFixed(1)}%`} 
                         icon={kpis.totalGrowth >= 0 ? <TrendingUp className="h-5 w-5 text-green-600" /> : <TrendingDown className="h-5 w-5 text-red-600" />}
                         trend={kpis.totalGrowth}
@@ -454,7 +457,7 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                             <span className="font-medium text-slate-700">{client.RutaVenta}</span>
                         </div>
                         <div>
-                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">Crecimiento</span>
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">Var YTD</span>
                             <span className={`font-medium ${client.Var2025vs2024 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {(client.Var2025vs2024 * 100).toFixed(1)}%
                             </span>
