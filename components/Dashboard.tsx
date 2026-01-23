@@ -15,8 +15,19 @@ interface DashboardProps {
 
 // Custom render for Treemap cells
 const CustomizedTreemapContent = (props: any) => {
-    const { x, y, width, height, index, name, value } = props;
+    const { x, y, width, height, index, name } = props;
     const safeName = name || 'Sin Nombre';
+
+    // Lógica para visibilidad:
+    // width > 40 asegura espacio suficiente para al menos unas letras legibles
+    const showLabel = width > 40 && height > 25;
+    
+    // Ajuste dinámico de longitud de texto
+    // Divisor 7.5 ajustado para fuente de 12px
+    const maxChars = Math.floor(width / 7.5); 
+    const displayText = safeName.length > maxChars 
+        ? safeName.substring(0, Math.max(0, maxChars - 3)) + '...' 
+        : safeName;
 
     return (
         <g>
@@ -32,18 +43,18 @@ const CustomizedTreemapContent = (props: any) => {
                     strokeOpacity: 1,
                 }}
             />
-            {width > 60 && height > 40 ? (
+            {showLabel ? (
                 <text
                     x={x + width / 2}
                     y={y + height / 2}
                     textAnchor="middle"
                     fill="#fff"
-                    fontSize={11}
-                    fontWeight="bold"
-                    style={{ pointerEvents: 'none' }}
+                    fontSize={12}
+                    fontWeight={600} // Semi-bold para mejor definición sin empastarse
+                    style={{ pointerEvents: 'none' }} // Sin sombra (textShadow eliminado)
                 >
-                    <tspan x={x + width / 2} dy="-0.6em">{safeName.length > 12 ? safeName.substring(0, 12) + '...' : safeName}</tspan>
-                    <tspan x={x + width / 2} dy="1.2em">{formatNumber(value, 0)}</tspan>
+                    {/* dy centrado verticalmente */}
+                    <tspan dy=".35em">{displayText}</tspan>
                 </text>
             ) : null}
         </g>
@@ -298,24 +309,33 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                                 </div>
                                 <div className="space-y-3 flex-1">
                                     {processedData.winners.length > 0 ? (
-                                        processedData.winners.map((client, idx) => (
-                                            <div key={client.id} className="flex justify-between items-center group">
-                                                <div className="flex items-center gap-2 overflow-hidden">
-                                                    <span className="flex-shrink-0 w-5 h-5 bg-green-50 text-green-700 rounded-full flex items-center justify-center text-[10px] font-bold">
-                                                        {idx + 1}
-                                                    </span>
-                                                    <div className="min-w-0">
-                                                        <div className="text-xs font-semibold text-slate-700 truncate" title={client.RazonSocial}>
-                                                            {client.RazonSocial.length > 15 ? client.RazonSocial.substring(0, 15) + '...' : client.RazonSocial}
+                                        processedData.winners.map((client, idx) => {
+                                            const diff = (client.YTD2026 || 0) - (client.YTD2025 || 0);
+                                            return (
+                                                <div key={client.id} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 group hover:bg-slate-50 rounded-lg transition-colors px-1">
+                                                    <div className="flex items-start gap-3 overflow-hidden">
+                                                        {/* Rank Circle */}
+                                                        <span className="flex-shrink-0 w-7 h-7 bg-green-50 text-green-700 rounded-full flex items-center justify-center text-sm font-bold mt-0.5">
+                                                            {idx + 1}
+                                                        </span>
+                                                        <div className="min-w-0 flex flex-col">
+                                                            {/* Name - Uppercase, Dark & Bold */}
+                                                            <div className="text-sm font-bold text-slate-800 truncate uppercase leading-tight" title={client.RazonSocial}>
+                                                                {client.RazonSocial.length > 18 ? client.RazonSocial.substring(0, 18) + '...' : client.RazonSocial}
+                                                            </div>
+                                                            {/* Value - Slate 500, formatted with dots */}
+                                                            <div className="text-xs font-medium text-slate-500 mt-1">
+                                                                {diff > 0 ? '+' : ''}{formatNumber(diff, 0)} UC
+                                                            </div>
                                                         </div>
-                                                        <div className="text-[10px] text-slate-400">{formatNumber(client.UC12mm, 0)} UC</div>
+                                                    </div>
+                                                    {/* Percentage Badge */}
+                                                    <div className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md ml-2 shrink-0">
+                                                        +{formatNumber(client.Var2025vs2024 * 100, 1)}%
                                                     </div>
                                                 </div>
-                                                <div className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md ml-2">
-                                                    +{formatNumber(client.Var2025vs2024 * 100, 1)}%
-                                                </div>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     ) : (
                                         <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-4 text-center">
                                             <Award className="h-6 w-6 mb-1 opacity-20" />
@@ -333,24 +353,33 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                                 </div>
                                 <div className="space-y-3 flex-1">
                                     {processedData.losers.length > 0 ? (
-                                        processedData.losers.map((client, idx) => (
-                                            <div key={client.id} className="flex justify-between items-center group">
-                                                <div className="flex items-center gap-2 overflow-hidden">
-                                                    <span className="flex-shrink-0 w-5 h-5 bg-red-50 text-red-700 rounded-full flex items-center justify-center text-[10px] font-bold">
-                                                        {idx + 1}
-                                                    </span>
-                                                    <div className="min-w-0">
-                                                        <div className="text-xs font-semibold text-slate-700 truncate" title={client.RazonSocial}>
-                                                            {client.RazonSocial.length > 15 ? client.RazonSocial.substring(0, 15) + '...' : client.RazonSocial}
+                                        processedData.losers.map((client, idx) => {
+                                            const diff = (client.YTD2026 || 0) - (client.YTD2025 || 0);
+                                            return (
+                                                <div key={client.id} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 group hover:bg-slate-50 rounded-lg transition-colors px-1">
+                                                    <div className="flex items-start gap-3 overflow-hidden">
+                                                        {/* Rank Circle */}
+                                                        <span className="flex-shrink-0 w-7 h-7 bg-red-50 text-red-700 rounded-full flex items-center justify-center text-sm font-bold mt-0.5">
+                                                            {idx + 1}
+                                                        </span>
+                                                        <div className="min-w-0 flex flex-col">
+                                                            {/* Name - Uppercase, Dark & Bold */}
+                                                            <div className="text-sm font-bold text-slate-800 truncate uppercase leading-tight" title={client.RazonSocial}>
+                                                                {client.RazonSocial.length > 18 ? client.RazonSocial.substring(0, 18) + '...' : client.RazonSocial}
+                                                            </div>
+                                                            {/* Value - Slate 500, formatted with dots */}
+                                                            <div className="text-xs font-medium text-slate-500 mt-1">
+                                                                {diff > 0 ? '+' : ''}{formatNumber(diff, 0)} UC
+                                                            </div>
                                                         </div>
-                                                        <div className="text-[10px] text-slate-400">{formatNumber(client.UC12mm, 0)} UC</div>
+                                                    </div>
+                                                    {/* Percentage Badge */}
+                                                    <div className={`text-xs font-bold px-2 py-1 rounded-md ml-2 shrink-0 ${client.Var2025vs2024 < 0 ? 'text-red-600 bg-red-50' : 'text-slate-500 bg-slate-100'}`}>
+                                                        {formatNumber(client.Var2025vs2024 * 100, 1)}%
                                                     </div>
                                                 </div>
-                                                <div className={`text-xs font-bold px-2 py-1 rounded-md ml-2 ${client.Var2025vs2024 < 0 ? 'text-red-600 bg-red-50' : 'text-slate-500 bg-slate-100'}`}>
-                                                    {formatNumber(client.Var2025vs2024 * 100, 1)}%
-                                                </div>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     ) : (
                                         <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-4 text-center">
                                             <AlertCircle className="h-6 w-6 mb-1 opacity-20" />

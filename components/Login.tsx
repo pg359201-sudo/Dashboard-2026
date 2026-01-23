@@ -95,28 +95,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     
                     <div className="mt-6 text-center text-xs text-slate-400 space-y-3">
                         <p>v1.1.0 | Secured by Vercel</p>
-                        
-                        {/* Demo Credentials Hint - Only shown in Local/Demo mode */}
-                        {dbStatus === 'local' && (
-                            <div className="bg-orange-50 border border-orange-100 rounded-lg p-3 text-orange-800 animate-in fade-in zoom-in duration-300">
-                                <div className="flex items-center justify-center gap-1 mb-2 font-semibold text-orange-900">
-                                    <KeyRound className="h-3 w-3" /> Credenciales Demo
-                                </div>
-                                <div className="grid grid-cols-2 gap-2 text-left bg-white/50 p-2 rounded">
-                                    <div>
-                                        <span className="block text-[10px] uppercase text-orange-400 font-bold">Admin</span>
-                                        <code className="text-sm bg-white px-1 rounded border border-orange-100">admin123</code>
-                                    </div>
-                                    <div>
-                                        <span className="block text-[10px] uppercase text-orange-400 font-bold">Vendedor</span>
-                                        <code className="text-sm bg-white px-1 rounded border border-orange-100">sales2024</code>
-                                    </div>
-                                </div>
-                                <p className="mt-2 text-[10px] text-orange-600/80 leading-tight">
-                                    Configura las variables de entorno en Vercel para establecer tus propias contraseñas y base de datos.
-                                </p>
-                            </div>
-                        )}
                     </div>
                 </form>
             </div>
