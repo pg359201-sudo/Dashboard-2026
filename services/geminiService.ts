@@ -8,30 +8,34 @@ export const generateSalesAnalysis = async (
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
-        // Summarize context to save tokens. We send top 50 records sorted by Volume if list is huge
-        // or aggregated stats.
-        const summary = contextData.length > 50 
-            ? contextData
-                .sort((a, b) => b.UC12mm - a.UC12mm)
-                .slice(0, 50) 
-            : contextData;
+        // MODIFICACIÓN: Se elimina el límite de 50 registros.
+        // Se envía la totalidad de los datos para aprovechar la ventana de contexto de Gemini Flash.
+        // Esto permite análisis reales de "El peor cliente", "Total compañía", etc.
+        const dataString = JSON.stringify(contextData);
 
-        const dataString = JSON.stringify(summary);
+        // MODIFICACIÓN: Prompt de Sistema "Analista Experto"
+        const systemInstruction = `Actúa como un Analista de Información Experto y Senior.
+        Tu objetivo es proveer inteligencia de negocios precisa basada en los datos adjuntos.
 
-        const systemInstruction = `Eres un analista de ventas experto para la app SalesComander Pro.
-        Responde basándote estrictamente en los datos adjuntos en formato JSON.
-        Los datos representan clientes, volumen anual (UC 12mm), volumen YTD 2025 y YTD 2026.
-        La columna 'Var2025vs2024' representa el crecimiento YTD (Var YTD) calculado entre 2026 vs 2025.
+        Tus Directrices de Comportamiento son:
+        1. RESPUESTAS CONCRETAS Y SIN RODEOS: Ve directo al grano. No uses saludos floridos ni despedidas genéricas. Dame el dato duro.
+        2. VERACIDAD TOTAL: Responde basándote ÚNICAMENTE en el JSON adjunto. NO inventes información. Si el dato no existe, di claramente: "No tengo información sobre eso en la base de datos".
+        3. ANÁLISIS INTEGRAL: Tienes acceso a la base de datos COMPLETA. Realiza cálculos (sumas, promedios, máximos, mínimos) considerando todos los registros proporcionados.
+        4. FORMATO: Prioriza el uso de tablas Markdown para comparativas y listas compactas para hallazgos.
         
-        Si te preguntan por totales, calcula la suma de los datos proporcionados.
-        Sé conciso, profesional y usa formato Markdown para resaltar números clave.`;
+        Diccionario de Datos:
+        - UC12mm: Volumen Anual (Cajas Unitarias).
+        - Var2025vs2024: Crecimiento YTD (decimal, ej: 0.10 es 10%).
+        - ShareREFRESCOS: Participación de mercado.
+        - TP: Precio Promedio.
+        `;
 
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
-            contents: `DATOS DE CONTEXTO (Top clientes por volumen):
+            contents: `BASE DE DATOS DE VENTAS (JSON):
             ${dataString}
             
-            Pregunta del usuario: ${query}`,
+            SOLICITUD DE ANÁLISIS: ${query}`,
              config: {
                 systemInstruction: systemInstruction,
                 thinkingConfig: { thinkingBudget: 0 } // Disable thinking for faster response on flash model
@@ -41,6 +45,6 @@ export const generateSalesAnalysis = async (
         return response.text || "No se pudo generar una respuesta.";
     } catch (error) {
         console.error("Gemini Error:", error);
-        return "Lo siento, hubo un error al consultar a la IA. Verifica tu conexión o intenta de nuevo.";
+        return "Error crítico en el análisis. Es posible que el volumen de datos exceda el límite momentáneo o haya problemas de conexión.";
     }
 };
