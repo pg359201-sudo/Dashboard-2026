@@ -41,7 +41,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div className="bg-blue-600 p-8 text-center relative">
                     <h1 className="text-3xl font-bold text-white mb-2">SalesComander Pro</h1>
-                    <p className="text-blue-100">Sistema de Gestión Comercial</p>
                     
                     {/* Database Status Badge */}
                     <div className="absolute top-4 right-4">
