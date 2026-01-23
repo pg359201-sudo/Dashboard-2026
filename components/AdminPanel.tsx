@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2, Globe, ShieldAlert, BarChart3, Users, HelpCircle } from 'lucide-react';
 import { parseExcelFile, saveToStorage } from '../services/dataService';
 import { SalesRecord } from '../types';
+import { formatNumber } from '../constants';
 
 interface AdminPanelProps {
     onLogout: () => void;
@@ -140,7 +141,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                         <span className="text-xs font-medium uppercase">Volumen Total</span>
                                     </div>
                                     <p className={`text-xl font-bold ${stats.totalVol === 0 ? 'text-red-600' : 'text-slate-800'}`}>
-                                        {stats.totalVol.toLocaleString()}
+                                        {formatNumber(stats.totalVol, 0)}
                                     </p>
                                 </div>
                             </div>

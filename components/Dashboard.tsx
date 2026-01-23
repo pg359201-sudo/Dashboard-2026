@@ -4,7 +4,7 @@ import {
     Treemap, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart } from 'lucide-react';
-import { COLORS } from '../constants';
+import { COLORS, formatNumber } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 import { loadFromStorage } from '../services/dataService';
 
@@ -43,7 +43,7 @@ const CustomizedTreemapContent = (props: any) => {
                     style={{ pointerEvents: 'none' }}
                 >
                     <tspan x={x + width / 2} dy="-0.6em">{safeName.length > 12 ? safeName.substring(0, 12) + '...' : safeName}</tspan>
-                    <tspan x={x + width / 2} dy="1.2em">{Number(value).toLocaleString()}</tspan>
+                    <tspan x={x + width / 2} dy="1.2em">{formatNumber(value, 0)}</tspan>
                 </text>
             ) : null}
         </g>
@@ -237,20 +237,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <KpiCard 
                         title="Volumen Total (UC)" 
-                        value={kpis.totalVol.toLocaleString('es-PE', { maximumFractionDigits: 0 })} 
+                        value={formatNumber(kpis.totalVol, 0)} 
                         icon={<Package className="h-5 w-5 text-blue-600" />}
                         trend={null}
                     />
                     <KpiCard 
                         title="var YTD" 
-                        value={`${(kpis.totalGrowth * 100).toFixed(1)}%`} 
+                        value={`${formatNumber(kpis.totalGrowth * 100, 1)}%`} 
                         icon={kpis.totalGrowth >= 0 ? <TrendingUp className="h-5 w-5 text-green-600" /> : <TrendingDown className="h-5 w-5 text-red-600" />}
                         trend={kpis.totalGrowth}
                         isPercent
                     />
                     <KpiCard 
                         title="Share Refrescos Promedio" 
-                        value={`${(kpis.avgShare * 100).toFixed(1)}%`} 
+                        value={`${formatNumber(kpis.avgShare * 100, 1)}%`} 
                         icon={<PieChart className="h-5 w-5 text-purple-600" />}
                         trend={null}
                     />
@@ -274,7 +274,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                                     content={<CustomizedTreemapContent />}
                                 >
                                     <RechartsTooltip 
-                                        formatter={(value: any) => [Number(value).toLocaleString(), 'UC Volumen']}
+                                        formatter={(value: any) => [formatNumber(value, 0), 'UC Volumen']}
                                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                     />
                                 </Treemap>
@@ -308,11 +308,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                                                         <div className="text-xs font-semibold text-slate-700 truncate" title={client.RazonSocial}>
                                                             {client.RazonSocial.length > 15 ? client.RazonSocial.substring(0, 15) + '...' : client.RazonSocial}
                                                         </div>
-                                                        <div className="text-[10px] text-slate-400">{Number(client.UC12mm).toLocaleString()} UC</div>
+                                                        <div className="text-[10px] text-slate-400">{formatNumber(client.UC12mm, 0)} UC</div>
                                                     </div>
                                                 </div>
                                                 <div className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md ml-2">
-                                                    +{(client.Var2025vs2024 * 100).toFixed(1)}%
+                                                    +{formatNumber(client.Var2025vs2024 * 100, 1)}%
                                                 </div>
                                             </div>
                                         ))
@@ -343,11 +343,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                                                         <div className="text-xs font-semibold text-slate-700 truncate" title={client.RazonSocial}>
                                                             {client.RazonSocial.length > 15 ? client.RazonSocial.substring(0, 15) + '...' : client.RazonSocial}
                                                         </div>
-                                                        <div className="text-[10px] text-slate-400">{Number(client.UC12mm).toLocaleString()} UC</div>
+                                                        <div className="text-[10px] text-slate-400">{formatNumber(client.UC12mm, 0)} UC</div>
                                                     </div>
                                                 </div>
                                                 <div className={`text-xs font-bold px-2 py-1 rounded-md ml-2 ${client.Var2025vs2024 < 0 ? 'text-red-600 bg-red-50' : 'text-slate-500 bg-slate-100'}`}>
-                                                    {(client.Var2025vs2024 * 100).toFixed(1)}%
+                                                    {formatNumber(client.Var2025vs2024 * 100, 1)}%
                                                 </div>
                                             </div>
                                         ))
@@ -398,7 +398,7 @@ const KpiCard: React.FC<{ title: string, value: string, icon: React.ReactNode, t
             {trend !== null && (
                 <div className={`text-xs mt-2 font-medium flex items-center gap-1 ${trend >= 0 ? 'text-green-600 bg-green-50 px-2 py-0.5 rounded-full inline-flex' : 'text-red-600 bg-red-50 px-2 py-0.5 rounded-full inline-flex'}`}>
                     {trend >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    <span>{trend >= 0 ? '+' : ''}{isPercent ? (trend * 100).toFixed(1) + '%' : trend} vs Año Ant.</span>
+                    <span>{trend >= 0 ? '+' : ''}{formatNumber(trend * 100, 1)}% vs Año Ant.</span>
                 </div>
             )}
         </div>
@@ -415,7 +415,7 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
     const renderShareItem = (label: string, vol: number) => {
         const total = client.UC12mm || 0;
         const percent = total > 0 ? (vol / total) * 100 : 0;
-        const displayValue = percent.toFixed(1) + '%';
+        const displayValue = formatNumber(percent, 1) + '%';
         
         // If the percentage rounds to 0.0 or is effectively 0, color it red
         const isZero = percent < 0.05; 
@@ -442,7 +442,7 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                     </div>
                     <div>
                         <div className="font-semibold text-slate-800 text-sm">{client.RazonSocial}</div>
-                        <div className="text-xs text-slate-500 mt-0.5">Vol: <strong>{client.UC12mm.toLocaleString()} UC</strong></div>
+                        <div className="text-xs text-slate-500 mt-0.5">Vol: <strong>{formatNumber(client.UC12mm, 0)} UC</strong></div>
                     </div>
                 </div>
                 <div className={`p-1 rounded-full bg-slate-100 text-slate-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
@@ -459,19 +459,19 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                         <div>
                             <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">Var YTD</span>
                             <span className={`font-medium ${client.Var2025vs2024 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {(client.Var2025vs2024 * 100).toFixed(1)}%
+                                {formatNumber(client.Var2025vs2024 * 100, 1)}%
                             </span>
                         </div>
                         
                         {/* New TP Section */}
                         <div>
                             <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">TP</span>
-                            <span className="font-medium text-slate-700">{client.TP ? client.TP.toFixed(2) : '0.00'}</span>
+                            <span className="font-medium text-slate-700">{client.TP ? formatNumber(client.TP, 2) : '0,00'}</span>
                         </div>
                         <div>
                             <span className="text-[10px] uppercase tracking-wide text-slate-400 block mb-0.5">TP %</span>
                             <span className="font-medium text-slate-700">
-                                {client.TP_RED ? (client.TP_RED * 100).toFixed(1) : '0.0'}%
+                                {client.TP_RED ? formatNumber(client.TP_RED * 100, 1) : '0,0'}%
                             </span>
                         </div>
 
@@ -485,7 +485,7 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                                     ></div>
                                 </div>
                                 <span className="text-xs font-bold text-slate-700 w-10 text-right">
-                                    {(client.ShareREFRESCOS * 100).toFixed(0)}%
+                                    {formatNumber(client.ShareREFRESCOS * 100, 0)}%
                                 </span>
                             </div>
                         </div>

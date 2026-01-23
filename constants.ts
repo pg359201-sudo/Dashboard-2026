@@ -71,3 +71,18 @@ export const GEMINI_API_KEY = getEnv('NEXT_PUBLIC_GEMINI_API_KEY', '');
 export const BLOB_TOKEN = getEnv('NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN', '');
 
 export const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c'];
+
+/**
+ * Formatea un número al estilo Latino/Español.
+ * - Separador de miles: Punto (.)
+ * - Separador decimal: Coma (,)
+ * Ejemplo: 1000.50 -> "1.000,50"
+ */
+export const formatNumber = (value: number | undefined | null, decimals: number = 0): string => {
+    if (value === undefined || value === null || isNaN(value)) return '0';
+    
+    return new Intl.NumberFormat('es-ES', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+    }).format(value);
+};
