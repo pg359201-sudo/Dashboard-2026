@@ -11,20 +11,24 @@ const normalizeKey = (key: string): string => {
     return String(key).toLowerCase().trim().replace(/[^a-z0-9]/g, '');
 };
 
-// Helper to find value in row by strictly comparing normalized keys
+// Helper to find value in row by searching for prioritized keys
+// Cambiado para iterar sobre searchKeys primero (Prioridad)
 const getValue = (row: any, searchKeys: string[]): any => {
     if (!row) return undefined;
     
-    // Obtenemos las claves reales del Excel
     const rowKeys = Object.keys(row);
-    
-    // Normalizamos las claves de búsqueda
-    const normalizedSearchKeys = searchKeys.map(k => normalizeKey(k));
+    // Mapa: ClaveNormalizada -> ClaveReal
+    const normalizedRowMap: Record<string, string> = {};
+    rowKeys.forEach(k => {
+        normalizedRowMap[normalizeKey(k)] = k;
+    });
 
-    for (const rowKey of rowKeys) {
-        const normalizedRowKey = normalizeKey(rowKey);
-        if (normalizedSearchKeys.includes(normalizedRowKey)) {
-            return row[rowKey];
+    // Iteramos por las claves que BUSCAMOS (respetando orden de preferencia)
+    for (const searchKey of searchKeys) {
+        const normalizedSearch = normalizeKey(searchKey);
+        if (normalizedRowMap[normalizedSearch]) {
+            const realKey = normalizedRowMap[normalizedSearch];
+            return row[realKey];
         }
     }
     return undefined;
@@ -89,7 +93,8 @@ const sanitizeData = (rawData: any[]): SalesRecord[] => {
         return {
             id: `row-${index}`,
             // TEXT COLUMNS
-            RazonSocial: getValue(row, ['RazonSocial', 'RazonCliente', 'Cliente', 'Nombre']) || 'Desconocido',
+            // Priorizamos RazonSocial, si no está, usamos Cliente
+            RazonSocial: getValue(row, ['RazonSocial', 'Cliente', 'RazonCliente', 'Nombre']) || 'Desconocido',
             GEC: getValue(row, ['GEC', 'Sello', 'Clasificacion']) || 'Otros',
             GrupoCanal: getValue(row, ['GrupoCanal', 'Grupo Canal', 'Canal']) || 'Otros',
             RutaVenta: getValue(row, ['RutaVenta', 'Ruta', 'Codigo Ruta']) || 'S/R',
@@ -130,16 +135,61 @@ export const parseExcelFile = (file: File): Promise<{ data: SalesRecord[], debug
                 const workbook = XLSX.read(data, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
+
+                // ESTRATEGIA: Encontrar la fila de encabezado correcta
+                // Leemos como matriz de matrices primero
+                const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
                 
-                const jsonData = XLSX.utils.sheet_to_json(sheet);
+                if (rawRows.length === 0) {
+                    throw new Error("El archivo parece estar vacío.");
+                }
+
+                let headerRowIndex = 0;
+                let foundHeader = false;
+
+                // Buscamos en las primeras 10 filas claves criticas
+                for (let i = 0; i < Math.min(rawRows.length, 10); i++) {
+                    const row = rawRows[i];
+                    const rowValues = row.map(cell => normalizeKey(String(cell)));
+                    
+                    // Si contiene columnas clave
+                    if (rowValues.includes('uc12mm') || 
+                        rowValues.includes('razonsocial') || 
+                        rowValues.includes('cliente')) {
+                        headerRowIndex = i;
+                        foundHeader = true;
+                        console.log(`Encabezado encontrado en fila ${i} (Visual: ${i + 1})`);
+                        break;
+                    }
+                }
+
+                // SI NO SE ENCUENTRA AUTOMATICAMENTE: Usamos Fila 2 (Index 1) como backup solicitado
+                if (!foundHeader) {
+                    console.warn("Encabezado no detectado automáticamente. Forzando Fila 2 (Index 1).");
+                    headerRowIndex = 1;
+                }
+
+                // Parseamos usando el rango detectado (range omite las filas anteriores al header)
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { range: headerRowIndex });
                 
                 if (jsonData.length === 0) {
-                    throw new Error("El archivo parece estar vacío o no se pudo leer la primera hoja.");
+                     // Intento de rescate: Si Fila 2 estaba vacía, probar Fila 1 (0)
+                     if (headerRowIndex === 1) {
+                         const retryData = XLSX.utils.sheet_to_json(sheet);
+                         if (retryData.length > 0) {
+                             const sanitizedRetry = sanitizeData(retryData);
+                             // Return temprano si funciona el retry
+                             const debugHeadersRetry = Object.keys(retryData[0] as object);
+                             resolve({ data: sanitizedRetry, debugHeaders: debugHeadersRetry });
+                             return;
+                         }
+                     }
+                     throw new Error("No se pudieron extraer datos legibles. Verifique que la hoja no esté vacía.");
                 }
 
                 // Capture headers for debugging
                 const firstRow = jsonData[0] as object;
-                const debugHeaders = Object.keys(firstRow);
+                const debugHeaders = firstRow ? Object.keys(firstRow) : [];
 
                 const sanitized = sanitizeData(jsonData);
                 resolve({ data: sanitized, debugHeaders });
