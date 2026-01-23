@@ -402,14 +402,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         </span>
                     </div>
                     <div className="divide-y divide-slate-100">
-                        {filteredData.slice(0, 50).map((client) => (
+                        {filteredData.map((client) => (
                             <ClientRow key={client.id} client={client} />
                         ))}
-                        {filteredData.length > 50 && (
-                            <div className="p-4 text-center text-sm text-slate-500 bg-slate-50">
-                                Mostrando primeros 50 registros. Use los filtros superiores para ver más.
-                            </div>
-                        )}
                     </div>
                 </div>
             </main>
