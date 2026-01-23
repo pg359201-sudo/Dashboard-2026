@@ -1,12 +1,100 @@
 import React, { useState } from 'react';
 import { ADMIN_PASSWORD, VIEWER_PASSWORD } from '../constants';
-import { Lock, Loader2 } from 'lucide-react';
+import { Lock, Loader2, Fingerprint } from 'lucide-react';
 
 interface LoginProps {
     onLogin: (role: 'admin' | 'viewer') => void;
 }
 
-// Logo: Escudo Táctico estilo USA con Espada y Ojo de la Providencia (AI)
+// --- COMPONENTS ---
+
+// 1. Page Background (Blanco Puro Limpio)
+const PageBackground = () => (
+    <div className="absolute inset-0 z-0 bg-white">
+        {/* Fondo blanco puro, sin trazos de circuito */}
+    </div>
+);
+
+// 2. Header Tech Pattern (Trazos tecnológicos SOLO en el encabezado oscuro - Versión Enriquecida)
+const HeaderTechPattern = () => (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="header-grid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="0.5" fill="white" opacity="0.15" />
+                </pattern>
+                
+                <linearGradient id="line-fade" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="white" stopOpacity="0" />
+                    <stop offset="50%" stopColor="white" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="white" stopOpacity="0" />
+                </linearGradient>
+            </defs>
+
+            {/* Grid de puntos muy sutil para textura tech */}
+            <rect width="100%" height="100%" fill="url(#header-grid)" />
+
+            {/* Circuit Lines - Trazos Complejos y Tecnológicos */}
+            <g stroke="white" strokeWidth="1" fill="none" strokeOpacity="0.15">
+                {/* --- Left Side Complex --- */}
+                {/* Bus Lines (Parallel Traces) */}
+                <path d="M -20 40 H 30 L 50 60 V 140 L 30 160" />
+                <path d="M -20 46 H 26 L 44 64 V 136" strokeOpacity="0.1" /> 
+                <circle cx="50" cy="60" r="2" fill="white" stroke="none" opacity="0.3" />
+                
+                {/* Branch Trace Left */}
+                <path d="M 0 90 H 20 L 30 100 V 120" />
+                <circle cx="30" cy="100" r="1.5" fill="white" stroke="none" opacity="0.2" />
+                
+                {/* Chip/Node Decoration Left */}
+                <rect x="18" y="88" width="4" height="4" fill="white" fillOpacity="0.1" stroke="none" />
+                <path d="M 22 90 H 28" strokeWidth="0.5" strokeOpacity="0.2" />
+
+                {/* Data bits Left */}
+                <circle cx="44" cy="80" r="1" fill="white" stroke="none" opacity="0.2" />
+                <circle cx="44" cy="90" r="1" fill="white" stroke="none" opacity="0.2" />
+
+                {/* --- Right Side Complex --- */}
+                {/* Bus Lines (Parallel Traces) */}
+                <path d="M 100% 30 H calc(100% - 40px) L calc(100% - 70px) 60 V 150" />
+                <path d="M 100% 36 H calc(100% - 36px) L calc(100% - 64px) 64 V 140" strokeOpacity="0.1" />
+                <circle cx="calc(100% - 70px)" cy="60" r="2" fill="white" stroke="none" opacity="0.3" />
+                
+                {/* Secondary Trace Right */}
+                <path d="M 100% 110 H calc(100% - 30px) L calc(100% - 50px) 130" />
+                <circle cx="calc(100% - 50px)" cy="130" r="1.5" fill="white" stroke="none" opacity="0.2" />
+                
+                {/* Chip decoration Right */}
+                <path d="M calc(100% - 80px) 40 H calc(100% - 90px) V 50" strokeOpacity="0.1" />
+                <rect x="calc(100% - 85px)" y="35" width="4" height="4" fill="white" fillOpacity="0.1" stroke="none" />
+
+                {/* --- Center / Bottom Accents --- */}
+                {/* Bottom Up Trace (Center Left) */}
+                <path d="M 100 100% V calc(100% - 20px) L 120 calc(100% - 40px) H 140" strokeOpacity="0.1" />
+                <circle cx="140" cy="calc(100% - 40px)" r="1.5" fill="white" stroke="none" opacity="0.2" />
+                
+                {/* Bottom Up Trace (Center Right) */}
+                <path d="M calc(100% - 100px) 100% V calc(100% - 25px) L calc(100% - 120px) calc(100% - 45px)" strokeOpacity="0.1" />
+                <rect x="calc(100% - 122px)" y="calc(100% - 47px)" width="3" height="3" fill="white" fillOpacity="0.1" stroke="none" />
+
+                {/* Top Corner Accents */}
+                <path d="M 10 0 V 15 L 25 30 H 50" strokeOpacity="0.1" />
+                <path d="M calc(100% - 10px) 0 V 15 L calc(100% - 25px) 30 H calc(100% - 50px)" strokeOpacity="0.1" />
+
+                {/* Floating Logic Nodes (dots) */}
+                <circle cx="20%" cy="20%" r="1" fill="white" opacity="0.1" />
+                <circle cx="80%" cy="25%" r="1" fill="white" opacity="0.1" />
+                <circle cx="15%" cy="80%" r="1" fill="white" opacity="0.1" />
+                <circle cx="85%" cy="75%" r="1" fill="white" opacity="0.1" />
+
+                {/* Linea decorativa inferior */}
+                <path d="M 0 100% L 100% 100%" stroke="url(#line-fade)" strokeWidth="0.5" />
+            </g>
+        </svg>
+    </div>
+);
+
+// 3. Logo: Escudo Táctico estilo USA con Espada y Ojo de la Providencia (AI)
 const ShieldLogo = () => (
     <svg viewBox="0 0 300 300" className="h-48 w-auto drop-shadow-2xl hover:scale-105 transition-transform duration-500">
         <defs>
@@ -59,10 +147,11 @@ const ShieldLogo = () => (
                 <stop offset="100%" stopColor="#78350f" />
             </linearGradient>
             
-            {/* AI EYE GRADIENT */}
+            {/* AI EYE GRADIENT - UPDATED FOR MORE EMPHASIS */}
             <radialGradient id="aiEyeGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                <stop offset="0%" stopColor="#22d3ee" /> {/* Cyan-400 */}
-                <stop offset="100%" stopColor="#0891b2" /> {/* Cyan-600 */}
+                <stop offset="0%" stopColor="#ffffff" /> {/* Core White */}
+                <stop offset="40%" stopColor="#22d3ee" /> {/* Cyan Bright */}
+                <stop offset="100%" stopColor="#0284c7" /> {/* Cyan Deep */}
             </radialGradient>
 
             {/* Glass Shine */}
@@ -161,32 +250,39 @@ const ShieldLogo = () => (
                  {/* Grip Texture */}
                  <path d="M94 62 L106 62 M94 68 L106 68 M94 74 L106 74 M94 80 L106 80" stroke="#d97706" strokeWidth="1" opacity="0.8" />
 
-                 {/* POMMEL REPLACED BY "THE ALL-SEEING EYE" (Sutil/Subtle) */}
-                 <g transform="translate(100, 52)">
+                 {/* POMMEL REPLACED BY "THE ALL-SEEING EYE" (Enhanced) */}
+                 <g transform="translate(100, 52) scale(1.25)"> {/* Scaled up for Emphasis */}
                      {/* 1. Connection to grip (Neck) */}
-                     <rect x="-3" y="2" width="6" height="6" fill="url(#goldHilt)" />
+                     <rect x="-2.5" y="2" width="5" height="5" fill="url(#goldHilt)" />
 
-                     {/* 2. The Eye Setting (Gold) */}
-                     {/* Almond shape: Width 28, Height 16 approx */}
-                     <path d="M -14 0 Q 0 -10 14 0 Q 0 10 -14 0 Z" 
-                           fill="url(#goldHilt)" stroke="#451a03" strokeWidth="1" />
+                     {/* 2. The Eye Setting (Gold) - More pronounced */}
+                     <path d="M -15 0 Q 0 -11 15 0 Q 0 11 -15 0 Z" 
+                           fill="url(#goldHilt)" stroke="#451a03" strokeWidth="0.8" />
                      
                      {/* 3. The Sclera (Dark Tech Background) */}
-                     <path d="M -10 0 Q 0 -6 10 0 Q 0 6 -10 0 Z" 
-                           fill="#0f172a" /> 
+                     <path d="M -11 0 Q 0 -7 11 0 Q 0 7 -11 0 Z" 
+                           fill="#020617" stroke="#1e293b" strokeWidth="0.5" /> 
 
-                     {/* 4. The Pupil (AI Core) - Pulsing Animation */}
-                     <circle cx="0" cy="0" r="3.5" fill="url(#aiEyeGlow)">
-                         {/* Subtle pulse to indicate intelligence/activity */}
-                         <animate attributeName="r" values="3.5;4.2;3.5" dur="3s" repeatCount="indefinite" />
-                         <animate attributeName="opacity" values="0.8;1;0.8" dur="3s" repeatCount="indefinite" />
+                     {/* 4. Iris Lines (Tech Rays) */}
+                     <g opacity="0.5">
+                        <line x1="0" y1="-5" x2="0" y2="-2.5" stroke="#22d3ee" strokeWidth="0.5" />
+                        <line x1="0" y1="5" x2="0" y2="2.5" stroke="#22d3ee" strokeWidth="0.5" />
+                        <line x1="-5" y1="0" x2="-2.5" y2="0" stroke="#22d3ee" strokeWidth="0.5" />
+                        <line x1="5" y1="0" x2="2.5" y2="0" stroke="#22d3ee" strokeWidth="0.5" />
+                     </g>
+
+                     {/* 5. The Pupil (AI Core) - Pulsing Animation */}
+                     <circle cx="0" cy="0" r="3" fill="url(#aiEyeGlow)">
+                         {/* More intense pulse */}
+                         <animate attributeName="r" values="2.8;3.8;2.8" dur="2.5s" repeatCount="indefinite" />
+                         <animate attributeName="opacity" values="0.9;1;0.9" dur="2.5s" repeatCount="indefinite" />
                      </circle>
                      
-                     {/* 5. Iris Details (Tech Rings) */}
-                     <circle cx="0" cy="0" r="5" fill="none" stroke="#22d3ee" strokeWidth="0.5" opacity="0.3" />
+                     {/* 6. Center Glint (Pure White) */}
+                     <circle cx="0" cy="0" r="1" fill="#ffffff" />
 
-                     {/* 6. Reflection */}
-                     <circle cx="-2" cy="-2" r="1.5" fill="white" opacity="0.8" />
+                     {/* 7. Reflection */}
+                     <circle cx="-3" cy="-2" r="1.5" fill="white" opacity="0.7" />
                  </g>
             </g>
 
@@ -224,12 +320,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-                {/* Header: Cambiado de Blue-600 a un degradado de grises oscuros (Slate/Gunmetal) */}
-                <div className="bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 p-8 text-center relative overflow-hidden">
-                    {/* Background Pattern */}
-                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-400 via-transparent to-transparent"></div>
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+            {/* Background Layer: White Pure Background */}
+            <PageBackground />
+
+            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 relative z-10">
+                {/* Header: Degradado oscuro con trazos tecnológicos internos - Menos intensidad (Slate 600-800) */}
+                <div className="bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 p-8 text-center relative overflow-hidden">
+                    {/* NEW: Tech Pattern only inside header */}
+                    <HeaderTechPattern />
                     
                     {/* SVG Logo Component */}
                     <div className="flex justify-center mb-4 relative z-10 -mt-2">
@@ -237,15 +336,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     </div>
 
                     <h1 className="text-3xl font-bold text-white mb-2 relative z-10 tracking-tight -mt-4">SalesComander Pro</h1>
-                    {/* Texto secundario cambiado a un gris claro/plata */}
                     <p className="text-slate-300 text-sm relative z-10">Sistema de Gestión Táctica</p>
                 </div>
                 
                 <form onSubmit={handleSubmit} className="p-8">
                     <div className="mb-6">
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Clave de Acceso
-                        </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <Lock className="h-5 w-5 text-slate-400" />
@@ -254,7 +349,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                // Focus ring cambiado a Slate para mantener la estética gris
                                 className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none transition-all shadow-sm"
                                 placeholder="Ingrese su contraseña..."
                                 autoFocus
@@ -271,10 +365,16 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <button
                         type="submit"
                         disabled={loading}
-                        // Botón cambiado a un gradiente de grises oscuros/negro táctico
-                        className="w-full bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-black text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-center items-center transform active:scale-[0.98]"
+                        className="w-full bg-gradient-to-r from-slate-600 to-slate-800 hover:from-slate-700 hover:to-slate-900 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-center items-center transform active:scale-[0.98]"
                     >
-                        {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Ingresar al Sistema'}
+                        {loading ? (
+                            <Loader2 className="animate-spin h-5 w-5" />
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <Fingerprint className="h-5 w-5" />
+                                <span>Acceso Seguro</span>
+                            </div>
+                        )}
                     </button>
                     
                     <div className="mt-6 text-center text-xs text-slate-400 space-y-3">
