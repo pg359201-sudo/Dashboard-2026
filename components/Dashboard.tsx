@@ -3,7 +3,7 @@ import { SalesRecord, FilterState } from '../types';
 import { 
     Treemap, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart } from 'lucide-react';
+import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle } from 'lucide-react';
 import { COLORS, formatNumber } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 import { loadFromStorage } from '../services/dataService';
@@ -110,7 +110,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
 
     // KPI Calculations
     const kpis = useMemo(() => {
-        if (filteredData.length === 0) return { totalVol: 0, totalGrowth: 0, avgShare: 0 };
+        if (filteredData.length === 0) return { totalVol: 0, totalGrowth: 0, avgShare: 0, avgTpRed: 0 };
         
         // 1. Total UC 12mm
         const totalVol = filteredData.reduce((acc, curr) => acc + (curr.UC12mm || 0), 0);
@@ -128,8 +128,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
         const avgShare = clientsWithShare.length > 0
             ? clientsWithShare.reduce((acc, curr) => acc + (curr.ShareREFRESCOS || 0), 0) / clientsWithShare.length
             : 0;
+
+        // 4. TP RED Promedio: Average of clients with TP_RED > 0
+        const clientsWithTpRed = filteredData.filter(d => (d.TP_RED || 0) > 0.0001);
+        const avgTpRed = clientsWithTpRed.length > 0
+            ? clientsWithTpRed.reduce((acc, curr) => acc + (curr.TP_RED || 0), 0) / clientsWithTpRed.length
+            : 0;
         
-        return { totalVol, totalGrowth, avgShare };
+        return { totalVol, totalGrowth, avgShare, avgTpRed };
     }, [filteredData]);
 
     // Data Preparation (Charts & Lists)
@@ -244,10 +250,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
             </section>
 
             <main className="p-4 space-y-6 max-w-7xl mx-auto">
-                {/* KPIs */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* KPIs - Compacted: grid-cols-2 on mobile, max-w-5xl constrained width */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 max-w-5xl mx-auto">
                     <KpiCard 
-                        title="Volumen Total (UC)" 
+                        title="Volumen (UC)" 
                         value={formatNumber(kpis.totalVol, 0)} 
                         icon={<Package className="h-5 w-5 text-blue-600" />}
                         trend={null}
@@ -260,9 +266,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         isPercent
                     />
                     <KpiCard 
-                        title="Share Refrescos Promedio" 
+                        title="Share Refrescos" 
                         value={`${formatNumber(kpis.avgShare * 100, 1)}%`} 
                         icon={<PieChart className="h-5 w-5 text-purple-600" />}
+                        trend={null}
+                    />
+                     <KpiCard 
+                        title="TP RED Prom." 
+                        value={`${formatNumber(kpis.avgTpRed * 100, 1)}%`} 
+                        icon={<CheckCircle className="h-5 w-5 text-emerald-600" />}
                         trend={null}
                     />
                 </div>
@@ -414,19 +426,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
     );
 };
 
+// Compact KpiCard (p-4 instead of p-5)
 const KpiCard: React.FC<{ title: string, value: string, icon: React.ReactNode, trend: number | null, isPercent?: boolean }> = ({ title, value, icon, trend, isPercent }) => (
-    <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-start justify-between hover:shadow-md transition-shadow">
+    <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-start justify-between hover:shadow-md transition-shadow">
         <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{title}</p>
-            <h4 className="text-2xl font-bold text-slate-900 mt-1">{value}</h4>
+            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide truncate">{title}</p>
+            <h4 className="text-xl font-bold text-slate-900 mt-0.5">{value}</h4>
             {trend !== null && (
-                <div className={`text-xs mt-2 font-medium flex items-center gap-1 ${trend >= 0 ? 'text-green-600 bg-green-50 px-2 py-0.5 rounded-full inline-flex' : 'text-red-600 bg-red-50 px-2 py-0.5 rounded-full inline-flex'}`}>
-                    {trend >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    <span>{trend >= 0 ? '+' : ''}{formatNumber(trend * 100, 1)}% vs Año Ant.</span>
+                <div className={`text-[10px] mt-1.5 font-medium flex items-center gap-0.5 ${trend >= 0 ? 'text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full inline-flex' : 'text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full inline-flex'}`}>
+                    {trend >= 0 ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
+                    <span>{trend >= 0 ? '+' : ''}{formatNumber(trend * 100, 1)}% vs AA</span>
                 </div>
             )}
         </div>
-        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+        <div className="p-2 bg-slate-50 rounded-lg border border-slate-100 shrink-0">
             {icon}
         </div>
     </div>
