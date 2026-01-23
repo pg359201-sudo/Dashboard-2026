@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2, Globe, ShieldAlert, BarChart3, Users } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2, Globe, ShieldAlert, BarChart3, Users, HelpCircle } from 'lucide-react';
 import { parseExcelFile, saveToStorage } from '../services/dataService';
 import { SalesRecord } from '../types';
 
@@ -12,6 +12,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
     const [stats, setStats] = useState<{ count: number; totalVol: number } | null>(null);
+    const [debugHeaders, setDebugHeaders] = useState<string[]>([]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -21,9 +22,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         setStatus('idle');
         setMessage('');
         setStats(null);
+        setDebugHeaders([]);
 
         try {
-            const data: SalesRecord[] = await parseExcelFile(file);
+            const { data, debugHeaders: headers } = await parseExcelFile(file);
+            setDebugHeaders(headers);
             
             // Calculate stats for feedback
             const count = data.length;
@@ -44,7 +47,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             console.error(error);
         } finally {
             setLoading(false);
-            // Clear input so same file can be selected again if needed
             e.target.value = '';
         }
     };
@@ -66,7 +68,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
             <main className="flex-1 flex flex-col items-center justify-center p-6">
                 <div className="max-w-xl w-full bg-white rounded-2xl shadow-xl border border-slate-200 p-8 text-center relative overflow-hidden">
-                    {/* Background decoration */}
                     <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
 
                     <div className="mb-6 flex justify-center relative">
@@ -115,7 +116,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                         </div>
                     </div>
 
-                    {/* Feedback Section */}
                     {status === 'success' && stats && (
                         <div className="animate-in fade-in slide-in-from-bottom-4 space-y-4">
                             <div className="p-4 bg-green-50 border border-green-100 rounded-xl flex items-center gap-3 text-left">
@@ -126,7 +126,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                 </div>
                             </div>
 
-                            {/* Stats Summary */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                                     <div className="flex items-center gap-2 text-slate-500 mb-1">
@@ -147,11 +146,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                             </div>
 
                             {stats.totalVol === 0 && (
-                                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-left flex gap-2">
-                                    <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
-                                    <p className="text-xs text-red-700">
-                                        <strong>Advertencia:</strong> El volumen total detectado es 0. Esto indica que el sistema no pudo leer la columna "UC 12mm". Verifique que el archivo Excel tenga ese nombre de columna exacto y que los números no estén almacenados como texto ilegible.
-                                    </p>
+                                <div className="mt-4 text-left">
+                                    <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex gap-2 mb-2">
+                                        <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+                                        <p className="text-xs text-red-700">
+                                            <strong>Error de Volumen:</strong> No se pudo leer la columna "UC 12mm".
+                                        </p>
+                                    </div>
+                                    <div className="bg-slate-100 rounded-lg p-3 text-[10px] text-slate-600 font-mono overflow-auto max-h-32 border border-slate-200">
+                                        <p className="font-bold mb-1">Columnas detectadas en su archivo:</p>
+                                        <p>{debugHeaders.join(', ')}</p>
+                                    </div>
                                 </div>
                             )}
                         </div>
