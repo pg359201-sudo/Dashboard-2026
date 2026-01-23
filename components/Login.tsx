@@ -132,12 +132,12 @@ const ShieldLogo = () => (
                 <stop offset="100%" stopColor="#1e293b" />
             </linearGradient>
 
-            {/* SWORD GRADIENTS */}
+            {/* SWORD GRADIENTS - IMPROVED CONTRAST */}
             <linearGradient id="swordBlade" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#94a3b8" />
+                <stop offset="0%" stopColor="#64748b" /> {/* Darker Edge */}
                 <stop offset="50%" stopColor="#ffffff" /> {/* Ridge Highlight */}
-                <stop offset="51%" stopColor="#cbd5e1" /> {/* Ridge Shadow */}
-                <stop offset="100%" stopColor="#64748b" />
+                <stop offset="50%" stopColor="#cbd5e1" /> {/* Ridge Shadow - Sharp transition */}
+                <stop offset="100%" stopColor="#475569" /> {/* Darker Edge */}
             </linearGradient>
 
             <linearGradient id="goldHilt" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -236,10 +236,10 @@ const ShieldLogo = () => (
 
             {/* 3. CENTRAL SWORD (Replaces Diamond) */}
             <g transform="translate(0, 5)" filter="url(#dropShadow)">
-                 {/* Blade */}
-                 <path d="M92 85 L108 85 L100 215 Z" fill="url(#swordBlade)" stroke="#475569" strokeWidth="0.5" />
+                 {/* Blade - Wider and more defined */}
+                 <path d="M90 85 L110 85 L100 218 Z" fill="url(#swordBlade)" stroke="#334155" strokeWidth="1" />
                  {/* Central Ridge of Blade */}
-                 <path d="M100 85 L100 215" stroke="#ffffff" strokeWidth="0.5" opacity="0.7" />
+                 <path d="M100 85 L100 218" stroke="#ffffff" strokeWidth="0.75" opacity="0.9" />
 
                  {/* Hilt / Crossguard */}
                  <path d="M75 85 L125 85 L125 92 L108 98 L100 102 L92 98 L75 92 Z" 
