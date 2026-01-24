@@ -3,7 +3,7 @@ import { SalesRecord, FilterState } from '../types';
 import { 
     Treemap, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, X, BarChart3 } from 'lucide-react';
+import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, ChevronUp, BarChart3, Layers } from 'lucide-react';
 import { COLORS, formatNumber } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 import { loadFromStorage } from '../services/dataService';
@@ -54,150 +54,127 @@ const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon, trend }) => {
     );
 };
 
-// --- CLIENT ROW (Clickable) ---
-const ClientRow: React.FC<{ client: SalesRecord; onClick: (c: SalesRecord) => void }> = ({ client, onClick }) => {
-    const isGrowth = (client.Var2025vs2024 || 0) >= 0;
-    
-    return (
-        <div 
-            onClick={() => onClick(client)}
-            className="px-5 py-4 hover:bg-blue-50 transition-colors flex items-center justify-between group cursor-pointer border-l-4 border-transparent hover:border-blue-500"
-        >
-            <div className="flex items-center gap-4 overflow-hidden">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-sm border ${
-                    isGrowth ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'
-                }`}>
-                    {client.RazonSocial.substring(0, 2).toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1 flex flex-col justify-center">
-                    <p className="text-sm font-bold text-gray-900 truncate group-hover:text-blue-700 transition-colors" title={client.RazonSocial}>{client.RazonSocial}</p>
-                    {/* Información secundaria eliminada a petición del usuario (GEC/Canal) */}
-                </div>
-            </div>
-            
-            <div className="text-right pl-4 flex flex-col items-end">
-                <p className="text-sm font-bold text-gray-900">{formatNumber(client.UC12mm, 0)} <span className="text-[10px] text-gray-400 font-normal">UC</span></p>
-                <div className={`flex items-center gap-1 text-xs font-bold ${isGrowth ? 'text-green-600' : 'text-red-600'}`}>
-                    {isGrowth ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    {formatNumber(Math.abs(client.Var2025vs2024 || 0) * 100, 1)}%
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// --- CLIENT DETAIL MODAL ---
-interface ClientDetailModalProps {
+// --- CLIENT ROW (Accordion Style) ---
+interface ClientRowProps {
     client: SalesRecord;
-    onClose: () => void;
+    isExpanded: boolean;
+    onToggle: () => void;
 }
 
-const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, onClose }) => {
-    const isPositive = (client.Var2025vs2024 || 0) >= 0;
+const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) => {
+    const isGrowth = (client.Var2025vs2024 || 0) >= 0;
 
-    // Preparar datos para el gráfico de barras (Mix de Categorías)
-    const categories = [
-        { label: 'Colas', value: client.VolColas },
-        { label: 'Sabores', value: client.VolSabores },
-        { label: 'Agua', value: client.VolAgua },
-        { label: 'Jugos', value: client.VolJugos },
-        { label: 'Isotonico', value: client.VolIsotonico },
-        { label: 'Energizantes', value: client.VolEnergizantes },
-        { label: 'Spirits', value: client.VolSpirits },
-        { label: 'Vinos', value: client.VolVinos },
-    ].sort((a, b) => (b.value || 0) - (a.value || 0)).filter(c => (c.value || 0) > 0);
-
+    // Preparar datos para el listado de Mix
+    const categories = useMemo(() => {
+        if (!isExpanded) return [];
+        return [
+            { label: 'Colas', value: client.VolColas },
+            { label: 'Sabores', value: client.VolSabores },
+            { label: 'Agua', value: client.VolAgua },
+            { label: 'Jugos', value: client.VolJugos },
+            { label: 'Isotonico', value: client.VolIsotonico },
+            { label: 'Energizantes', value: client.VolEnergizantes },
+            { label: 'Spirits', value: client.VolSpirits },
+            { label: 'Vinos', value: client.VolVinos },
+        ].sort((a, b) => (b.value || 0) - (a.value || 0)).filter(c => (c.value || 0) > 0);
+    }, [isExpanded, client]);
+    
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+        <div className="border-b border-gray-100 last:border-0">
+            {/* Header (Always Visible) */}
             <div 
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]" 
-                onClick={e => e.stopPropagation()}
+                onClick={onToggle}
+                className={`px-5 py-4 cursor-pointer transition-colors flex items-center justify-between group border-l-4 ${
+                    isExpanded ? 'bg-blue-50/50 border-blue-500' : 'hover:bg-gray-50 border-transparent hover:border-blue-300'
+                }`}
             >
-                {/* Header */}
-                <div className="bg-slate-50 border-b border-slate-200 p-6 flex justify-between items-start shrink-0">
-                    <div>
-                         {/* UPDATE: Reemplazado GEC/Canal por Resumen de Volumen y Crecimiento */}
-                         <div className="flex items-center gap-3 mb-2">
-                            <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-sm">
-                                <Package className="h-3.5 w-3.5 text-blue-600" />
-                                <span className="text-xs font-bold text-slate-700">{formatNumber(client.UC12mm, 0)} UC</span>
-                            </div>
-                             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border shadow-sm ${isPositive ? 'bg-green-50 border-green-100 text-green-700' : 'bg-red-50 border-red-100 text-red-700'}`}>
-                                {isPositive ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
-                                <span className="text-xs font-bold">{isPositive ? '+' : ''}{formatNumber(Math.abs(client.Var2025vs2024) * 100, 1)}%</span>
-                            </div>
-                        </div>
-
-                        <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight mb-2">{client.RazonSocial}</h2>
-                        <div className="text-xs text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
-                            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-300"></span> Ruta: <b>{client.RutaVenta}</b></span>
-                            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-300"></span> Desarr: <b>{client.RutaDesarr}</b></span>
-                        </div>
+                <div className="flex items-center gap-4 overflow-hidden">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-sm border ${
+                        isGrowth ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'
+                    }`}>
+                        {client.RazonSocial.substring(0, 2).toUpperCase()}
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500 bg-white shadow-sm border border-slate-200">
-                        <X className="h-5 w-5" />
-                    </button>
+                    <div className="min-w-0 flex-1 flex flex-col justify-center">
+                        <p className="text-sm font-bold text-gray-900 truncate group-hover:text-blue-700 transition-colors" title={client.RazonSocial}>
+                            {client.RazonSocial}
+                        </p>
+                    </div>
                 </div>
-
-                {/* Body - Scrollable */}
-                <div className="p-6 overflow-y-auto">
-                     {/* KPIs Grid */}
-                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                            <p className="text-[10px] text-blue-400 uppercase font-bold tracking-wider mb-1">Volumen Total</p>
-                            <p className="text-xl font-bold text-slate-800">{formatNumber(client.UC12mm, 0)} <span className="text-xs font-normal text-slate-400">uc</span></p>
-                        </div>
-                         <div className={`p-4 rounded-xl border ${client.Var2025vs2024 >= 0 ? 'bg-green-50/50 border-green-100' : 'bg-red-50/50 border-red-100'}`}>
-                            <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${client.Var2025vs2024 >= 0 ? 'text-green-600' : 'text-red-600'}`}>Crecimiento</p>
-                            <div className="flex items-center gap-1">
-                                {client.Var2025vs2024 >= 0 ? <TrendingUp className="h-4 w-4 text-green-600"/> : <TrendingDown className="h-4 w-4 text-red-600"/>}
-                                <p className={`text-xl font-bold ${client.Var2025vs2024 >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                                    {formatNumber(Math.abs(client.Var2025vs2024) * 100, 1)}%
-                                </p>
-                            </div>
-                        </div>
-                        <div className="p-4 bg-purple-50/50 rounded-xl border border-purple-100">
-                            <p className="text-[10px] text-purple-400 uppercase font-bold tracking-wider mb-1">Share Ref.</p>
-                            <p className="text-xl font-bold text-slate-800">{formatNumber((client.ShareREFRESCOS || 0) * 100, 1)}%</p>
-                        </div>
-                        <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
-                            <p className="text-[10px] text-emerald-600 uppercase font-bold tracking-wider mb-1">Ticket Prom.</p>
-                            <p className="text-xl font-bold text-slate-800">{formatNumber(client.TP_RED, 2)}</p>
-                        </div>
-                     </div>
-
-                     {/* Breakdown */}
-                     <div className="bg-white rounded-xl">
-                        <h3 className="text-sm font-bold text-slate-800 mb-5 flex items-center gap-2 pb-2 border-b border-slate-100">
-                            <BarChart3 className="h-4 w-4 text-slate-400" /> Mix de Volumen por Categoría
-                        </h3>
-                        <div className="space-y-4">
-                            {categories.map((cat, idx) => (
-                                <div key={cat.label} className="group">
-                                    <div className="flex justify-between items-end mb-1">
-                                        <span className="text-xs font-semibold text-slate-600">{cat.label}</span>
-                                        <span className="text-xs font-bold text-slate-800">{formatNumber(cat.value, 0)} uc</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                            <div 
-                                                className="h-full rounded-full transition-all duration-500 ease-out group-hover:opacity-80" 
-                                                style={{ 
-                                                    width: `${Math.min(((cat.value || 0) / (client.UC12mm || 1)) * 100, 100)}%`,
-                                                    backgroundColor: COLORS[idx % COLORS.length] 
-                                                }}
-                                            />
-                                        </div>
-                                        <span className="text-[10px] text-slate-400 w-8 text-right font-medium">
-                                            {formatNumber(((cat.value || 0) / (client.UC12mm || 1)) * 100, 0)}%
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                     </div>
+                
+                <div className="text-right pl-4 flex flex-col items-end">
+                    <p className="text-sm font-bold text-gray-900">{formatNumber(client.UC12mm, 0)} <span className="text-[10px] text-gray-400 font-normal">UC</span></p>
+                    <div className={`flex items-center gap-1 text-xs font-bold ${isGrowth ? 'text-green-600' : 'text-red-600'}`}>
+                        {isGrowth ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                        {formatNumber(Math.abs(client.Var2025vs2024 || 0) * 100, 1)}%
+                    </div>
                 </div>
             </div>
+
+            {/* Expanded Content (Minimalist List) */}
+            {isExpanded && (
+                <div className="bg-slate-50 px-5 py-4 animate-in slide-in-from-top-2 duration-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        {/* Info Column */}
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-4 text-xs text-slate-500">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] uppercase font-bold text-slate-400">Ruta Venta</span>
+                                    <span className="font-semibold text-slate-700">{client.RutaVenta}</span>
+                                </div>
+                                <div className="w-px h-6 bg-slate-200"></div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] uppercase font-bold text-slate-400">Desarrollador</span>
+                                    <span className="font-semibold text-slate-700">{client.RutaDesarr}</span>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm max-w-[200px]">
+                                <span className="text-xs font-medium text-slate-500">Share Refrescos</span>
+                                <span className="text-sm font-bold text-purple-600">{formatNumber((client.ShareREFRESCOS || 0) * 100, 1)}%</span>
+                            </div>
+                        </div>
+
+                        {/* Mix List Column (No Bars) */}
+                        <div>
+                            <div className="flex justify-between items-end mb-2 pb-1 border-b border-slate-200">
+                                <p className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
+                                    <Layers className="h-3 w-3" /> Mix de Categorías
+                                </p>
+                                <div className="flex gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <span>Vol (UC)</span>
+                                    <span className="w-10 text-right">Peso %</span>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-0.5">
+                                {categories.slice(0, 6).map((cat, idx) => {
+                                    const percent = ((cat.value || 0) / (client.UC12mm || 1)) * 100;
+                                    return (
+                                        <div key={cat.label} className="flex items-center justify-between py-1.5 hover:bg-slate-100/50 rounded px-1 transition-colors">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                                                <span className="text-[11px] font-medium text-slate-600 truncate max-w-[100px]">{cat.label}</span>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-[11px] font-bold text-slate-800">{formatNumber(cat.value, 0)}</span>
+                                                <span className="text-[10px] font-medium text-slate-500 w-10 text-right bg-slate-200/50 rounded px-1">
+                                                    {formatNumber(percent, 1)}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {categories.length > 6 && (
+                                    <p className="text-[9px] text-slate-400 text-center mt-2 italic">
+                                        ... y {categories.length - 6} categorías más
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -292,7 +269,7 @@ const CustomTreemapTooltip = ({ active, payload }: any) => {
 export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogout }) => {
     const [localData, setLocalData] = useState<SalesRecord[]>(initialData || []);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [selectedClient, setSelectedClient] = useState<SalesRecord | null>(null); // State for modal
+    const [expandedClientId, setExpandedClientId] = useState<string | null>(null); // State for accordion
     const [filters, setFilters] = useState<FilterState>({
         GEC: 'all',
         GrupoCanal: 'all',
@@ -313,6 +290,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
         } finally {
             setIsRefreshing(false);
         }
+    };
+
+    const handleToggleClient = (id: string) => {
+        setExpandedClientId(prev => prev === id ? null : id);
     };
 
     // Unique values for dropdowns
@@ -647,20 +628,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                             <ClientRow 
                                 key={client.id} 
                                 client={client} 
-                                onClick={setSelectedClient} 
+                                isExpanded={expandedClientId === client.id}
+                                onToggle={() => handleToggleClient(client.id)}
                             />
                         ))}
                     </div>
                 </div>
             </main>
-
-            {/* Modal de Detalle de Cliente */}
-            {selectedClient && (
-                <ClientDetailModal 
-                    client={selectedClient} 
-                    onClose={() => setSelectedClient(null)} 
-                />
-            )}
 
             <ChatAssistant data={filteredData} />
         </div>
