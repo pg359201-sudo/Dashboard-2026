@@ -3,7 +3,7 @@ import { SalesRecord, FilterState } from '../types';
 import { 
     Treemap, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, ChevronUp, BarChart3, Layers, Zap } from 'lucide-react';
+import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, ChevronUp, BarChart3, Layers, Zap, Target } from 'lucide-react';
 import { COLORS, formatNumber } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 import { loadFromStorage } from '../services/dataService';
@@ -64,6 +64,18 @@ interface ClientRowProps {
 const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) => {
     const isGrowth = (client.Var2025vs2024 || 0) >= 0;
 
+    // Helper para colores específicos solicitados
+    const getCategoryColor = (label: string) => {
+        const normalized = label.toLowerCase();
+        if (normalized.includes('agua')) return '#7dd3fc'; // Celeste claro (Sky-300)
+        if (normalized.includes('jugos')) return '#f97316'; // Naranja (Orange-500)
+        if (normalized.includes('isotonico')) return '#1e3a8a'; // Celeste oscuro/Azul (Blue-900)
+        if (normalized.includes('vinos')) return '#8b5cf6'; // Violeta (Violet-500)
+        if (normalized.includes('energizantes')) return '#22c55e'; // Verde Monster (Green-500)
+        if (normalized.includes('spirits')) return '#fdba74'; // Naranja claro (Orange-300)
+        return '#cbd5e1'; // Default gris
+    };
+
     // Preparar datos para el listado de Mix
     const categories = useMemo(() => {
         if (!isExpanded) return [];
@@ -74,7 +86,7 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
         return [
             { label: 'Colas', value: client.VolColas },
             { label: 'Sabores', value: client.VolSabores },
-            { label: 'Saborizadas', value: client.VolSaborizadas }, // Added for mapping but filtered below
+            { label: 'Saborizadas', value: client.VolSaborizadas },
             { label: 'Agua', value: client.VolAgua },
             { label: 'Jugos', value: client.VolJugos },
             { label: 'Isotonico', value: client.VolIsotonico },
@@ -121,48 +133,59 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
                 </div>
             </div>
 
-            {/* Expanded Content (Minimalist List) */}
+            {/* Expanded Content (Ultra Compact & Minimalist) */}
             {isExpanded && (
-                <div className="bg-slate-50 px-5 py-5 animate-in slide-in-from-top-2 duration-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-slate-50 px-3 py-3 animate-in slide-in-from-top-2 duration-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         
                         {/* LEFT: Info & Share Bar */}
-                        <div className="flex flex-col gap-5">
-                            {/* Metadata */}
-                            <div className="flex items-center gap-6 text-xs text-slate-500">
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Ruta Venta</span>
-                                    <span className="font-bold text-slate-700 mt-0.5">{client.RutaVenta}</span>
+                        <div className="flex flex-col gap-3">
+                            {/* Metadata Compacta + TP RED */}
+                            <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-100 shadow-sm">
+                                <div className="flex items-center gap-3 text-xs">
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] uppercase font-bold text-slate-400">Ruta</span>
+                                        <span className="font-bold text-slate-700">{client.RutaVenta}</span>
+                                    </div>
+                                    <div className="w-px h-5 bg-slate-200"></div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] uppercase font-bold text-slate-400">Desarrollador</span>
+                                        <span className="font-bold text-slate-700">{client.RutaDesarr}</span>
+                                    </div>
                                 </div>
-                                <div className="w-px h-6 bg-slate-200"></div>
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Desarrollador</span>
-                                    <span className="font-bold text-slate-700 mt-0.5">{client.RutaDesarr}</span>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[8px] uppercase font-bold text-slate-400 flex items-center gap-1">
+                                        <Target className="h-2.5 w-2.5" /> TP RED
+                                    </span>
+                                    <span className="font-bold text-slate-800 text-xs">{formatNumber(client.TP_RED, 2)}</span>
                                 </div>
                             </div>
                             
-                            {/* Share Refrescos Bar */}
-                            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                                <div className="flex justify-between items-end mb-2">
-                                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+                            {/* Share Refrescos Bar (Rojo-Blanco-Negro) */}
+                            <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                                <div className="flex justify-between items-end mb-1.5">
+                                    <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
                                         <PieChart className="h-3 w-3" /> Share Refrescos
                                     </span>
-                                    <span className="text-xl font-bold text-purple-600 leading-none">
+                                    <span className="text-base font-bold text-slate-900 leading-none">
                                         {formatNumber(shareVal, 1)}%
                                     </span>
                                 </div>
-                                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-100">
                                     <div 
-                                        className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500 ease-out"
-                                        style={{ width: `${Math.min(shareVal, 100)}%` }} 
+                                        className="h-full rounded-full transition-all duration-500 ease-out"
+                                        style={{ 
+                                            width: `${Math.min(shareVal, 100)}%`,
+                                            background: 'linear-gradient(90deg, #dc2626 0%, #f3f4f6 50%, #000000 100%)' 
+                                        }} 
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        {/* RIGHT: Mix Grid (Minimalist Cards, NOT TABLE) */}
+                        {/* RIGHT: Mix Grid (Compact Cards) */}
                         <div>
-                            <p className="text-[10px] uppercase font-bold text-slate-400 mb-3 flex items-center gap-1 tracking-wider">
+                            <p className="text-[9px] uppercase font-bold text-slate-400 mb-2 flex items-center gap-1 tracking-wider">
                                 <Layers className="h-3 w-3" /> Mix Estratégico
                             </p>
                             
@@ -171,17 +194,17 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
                                     {categories.map((cat, idx) => {
                                         const percent = ((cat.value || 0) / (client.UC12mm || 1)) * 100;
                                         return (
-                                            <div key={cat.label} className="bg-white border border-slate-100 rounded-lg p-2.5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-16">
+                                            <div key={cat.label} className="bg-white border border-slate-100 rounded-md p-2 shadow-sm flex flex-col justify-between h-12">
                                                 <div className="flex items-center gap-1.5">
-                                                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[(idx + 2) % COLORS.length] }}></div>
-                                                    <span className="text-[10px] font-semibold text-slate-500 truncate">{cat.label}</span>
+                                                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: getCategoryColor(cat.label) }}></div>
+                                                    <span className="text-[9px] font-semibold text-slate-500 truncate">{cat.label}</span>
                                                 </div>
-                                                <div className="flex items-end justify-between mt-1">
-                                                    <span className="text-lg font-bold text-slate-800 leading-none">
-                                                        {formatNumber(percent, 0)}<span className="text-[10px] text-slate-400">%</span>
+                                                <div className="flex items-end justify-between mt-0.5">
+                                                    <span className="text-sm font-bold text-slate-800 leading-none">
+                                                        {formatNumber(percent, 1)}<span className="text-[8px] text-slate-400">%</span>
                                                     </span>
-                                                    <span className="text-[9px] font-medium text-slate-400">
-                                                        {formatNumber(cat.value, 0)} uc
+                                                    <span className="text-[8px] font-medium text-slate-400">
+                                                        {formatNumber(cat.value, 0)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -189,8 +212,8 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
                                     })}
                                 </div>
                             ) : (
-                                <div className="text-xs text-slate-400 italic bg-slate-100 p-3 rounded-lg text-center">
-                                    Sin volumen en categorías estratégicas.
+                                <div className="text-[10px] text-slate-400 italic bg-slate-100 p-2 rounded-lg text-center">
+                                    Sin volumen estratégico.
                                 </div>
                             )}
                         </div>
