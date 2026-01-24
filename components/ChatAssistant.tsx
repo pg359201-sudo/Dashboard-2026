@@ -75,7 +75,7 @@ export const ChatAssistant: React.FC<ChatProps> = ({ data }) => {
     return (
         <div className="fixed bottom-0 right-0 md:bottom-6 md:right-6 w-full md:w-[400px] h-[100vh] md:h-[600px] bg-white md:rounded-2xl shadow-2xl flex flex-col z-50 border border-slate-200">
             {/* Header */}
-            <div className="p-4 pt-8 md:pt-4 bg-gradient-to-r from-blue-600 to-indigo-600 md:rounded-t-2xl flex justify-between items-center text-white shrink-0">
+            <div className="p-4 pt-12 md:pt-4 bg-gradient-to-r from-blue-600 to-indigo-600 md:rounded-t-2xl flex justify-between items-center text-white shrink-0">
                 <div className="flex items-center gap-2">
                     <Bot className="h-5 w-5" />
                     <div>
@@ -88,7 +88,7 @@ export const ChatAssistant: React.FC<ChatProps> = ({ data }) => {
                 </div>
                 <button 
                     onClick={() => setIsOpen(false)}
-                    className="p-2 hover:bg-white/20 rounded-lg transition-colors mr-1"
+                    className="p-2 mt-2 md:mt-0 hover:bg-white/20 rounded-lg transition-colors mr-1"
                 >
                     <X className="h-6 w-6" />
                 </button>
