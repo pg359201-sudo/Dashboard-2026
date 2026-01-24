@@ -136,23 +136,38 @@ const CustomizedTreemapContent = (props: any) => {
     );
 };
 
-// --- NUEVO: Tooltip Personalizado para mostrar Nombre y Volumen ---
+// --- NUEVO: Tooltip Personalizado Compacto y Gris ---
 const CustomTreemapTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-        // payload[0].payload contiene los datos originales del nodo del treemap
+        // payload[0].payload contiene los datos del nodo (incluyendo la nueva propiedad growth)
         const data = payload[0].payload;
+        const growth = data.growth || 0;
+        const isPositive = growth >= 0;
+
         return (
-            <div className="bg-white p-3 border border-gray-200 shadow-xl rounded-lg min-w-[160px] z-50">
-                {/* Nombre del Cliente: Texto pequeño pero negrita (text-xs font-bold) */}
-                <p className="text-xs font-bold text-gray-900 mb-1.5 leading-tight border-b border-gray-100 pb-1">
+            <div className="bg-white/95 backdrop-blur-sm p-2.5 border border-slate-100 shadow-lg rounded-md min-w-[130px] z-50">
+                {/* Nombre: Texto gris oscuro, pequeño y negrita */}
+                <p className="text-[10px] font-bold text-slate-500 mb-1.5 leading-tight border-b border-slate-100 pb-1 truncate max-w-[150px]">
                     {data.name}
                 </p>
-                {/* Volumen con formato 5.340 */}
-                <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-gray-500 uppercase font-medium">Volumen</span>
-                    <span className="text-sm font-bold text-blue-600">
-                        {formatNumber(data.value, 0)} <span className="text-[10px]">UC</span>
-                    </span>
+                
+                {/* Métricas: Estilo gris minimalista */}
+                <div className="flex flex-col gap-1">
+                    {/* Volumen */}
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="text-[9px] text-slate-400 uppercase tracking-wide font-medium">Volumen</span>
+                        <span className="text-[10px] font-bold text-slate-600">
+                            {formatNumber(data.value, 0)} <span className="text-[8px] font-normal">UC</span>
+                        </span>
+                    </div>
+
+                    {/* Var YTD (Growth) */}
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="text-[9px] text-slate-400 uppercase tracking-wide font-medium">Var YTD</span>
+                        <span className="text-[10px] font-bold text-slate-600">
+                            {isPositive ? '+' : ''}{formatNumber(growth * 100, 1)}%
+                        </span>
+                    </div>
                 </div>
             </div>
         );
@@ -243,7 +258,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
         
         // 1. Top 10 Clients by Volume (Treemap Data)
         const topClientsData = filteredData
-            .map(d => ({ name: d.RazonSocial, value: d.UC12mm || 0 }))
+            .map(d => ({ 
+                name: d.RazonSocial, 
+                value: d.UC12mm || 0,
+                growth: d.Var2025vs2024 || 0 // Included for Tooltip
+            }))
             .sort((a, b) => b.value - a.value)
             .slice(0, 10);
 
