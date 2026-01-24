@@ -378,7 +378,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         <ShieldLogo />
                     </div>
 
-                    <h1 className="text-3xl font-bold text-white mb-2 relative z-10 tracking-tight -mt-4">SalesComander Pro</h1>
+                    <h1 className="text-2xl font-tech font-bold text-white mb-2 relative z-10 tracking-wider uppercase -mt-4 whitespace-nowrap">SalesComander Pro</h1>
                     <p className="text-slate-300 text-sm relative z-10">Sistema de Gestión Táctica</p>
                 </div>
                 
