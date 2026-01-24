@@ -104,9 +104,9 @@ export const ChatAssistant: React.FC<ChatProps> = ({ data }) => {
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-slate-200 text-slate-600' : 'bg-blue-100 text-blue-600'}`}>
                             {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                         </div>
-                        <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm'}`}>
+                        <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'}`}>
                             {msg.role === 'assistant' ? (
-                                <div className="prose prose-sm prose-slate max-w-none">
+                                <div className="prose prose-sm prose-slate max-w-none leading-relaxed">
                                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                                 </div>
                             ) : (
