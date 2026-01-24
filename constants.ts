@@ -70,7 +70,18 @@ export const VIEWER_PASSWORD = getEnv('NEXT_PUBLIC_VIEWER_PASSWORD', 'sales2024'
 export const GEMINI_API_KEY = getEnv('NEXT_PUBLIC_GEMINI_API_KEY', '');
 export const BLOB_TOKEN = getEnv('NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN', '');
 
-export const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c'];
+// Updated Pastel Palette for a softer, modern look
+export const COLORS = [
+    '#93C5FD', // Soft Blue (Blue-300)
+    '#6EE7B7', // Soft Emerald (Emerald-300)
+    '#FDE047', // Soft Yellow (Yellow-300)
+    '#FDBA74', // Soft Orange (Orange-300)
+    '#C4B5FD', // Soft Violet (Violet-300)
+    '#86EFAC', // Soft Green (Green-300)
+    '#F9A8D4', // Soft Pink (Pink-300)
+    '#67E8F9', // Soft Cyan (Cyan-300)
+    '#FDA4AF'  // Soft Rose (Rose-300)
+];
 
 /**
  * Formatea un número al estilo Latino/Español.
