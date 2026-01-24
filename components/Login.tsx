@@ -415,7 +415,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         ) : (
                             <div className="flex items-center gap-2">
                                 <Fingerprint className="h-5 w-5" />
-                                <span>Acceso Seguro</span>
+                                <span className="font-tech tracking-wider uppercase text-xs">Acceso Seguro</span>
                             </div>
                         )}
                     </button>
