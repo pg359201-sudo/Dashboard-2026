@@ -3,7 +3,7 @@ import { SalesRecord, FilterState } from '../types';
 import { 
     Treemap, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, ChevronUp, BarChart3, Layers, Zap, Target } from 'lucide-react';
+import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, ChevronUp, BarChart3, Layers, Zap, Target, Trophy } from 'lucide-react';
 import { COLORS, formatNumber } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 import { loadFromStorage } from '../services/dataService';
@@ -31,9 +31,9 @@ const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon, trend }) => {
     
     return (
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-2">
-                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{title}</h3>
-                 <div className="p-2 bg-gray-50 rounded-lg">{icon}</div>
+            <div className="flex justify-between items-center mb-2 gap-2">
+                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">{title}</h3>
+                 <div className="p-1 bg-white rounded-lg">{icon}</div>
             </div>
             <div className="flex flex-col gap-1">
                 <span className="text-2xl font-bold text-gray-900 tracking-tight">{value}</span>
@@ -42,11 +42,6 @@ const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon, trend }) => {
                         <TrendIcon className="h-3 w-3" />
                         <span>{formatNumber(Math.abs(trend!) * 100, 1)}%</span>
                         <span className="text-gray-400 font-normal ml-1">vs año ant.</span>
-                    </div>
-                )}
-                 {!showTrend && (
-                    <div className="text-xs text-gray-400 font-medium mt-1">
-                        Métrica general
                     </div>
                 )}
             </div>
@@ -67,12 +62,12 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
     // Helper para colores específicos solicitados
     const getCategoryColor = (label: string) => {
         const normalized = label.toLowerCase();
-        if (normalized.includes('agua')) return '#7dd3fc'; // Celeste claro (Sky-300)
-        if (normalized.includes('jugos')) return '#f97316'; // Naranja (Orange-500)
-        if (normalized.includes('isotonico')) return '#1e3a8a'; // Celeste oscuro/Azul (Blue-900)
-        if (normalized.includes('vinos')) return '#8b5cf6'; // Violeta (Violet-500)
-        if (normalized.includes('energizantes')) return '#22c55e'; // Verde Monster (Green-500)
-        if (normalized.includes('spirits')) return '#fdba74'; // Naranja claro (Orange-300)
+        if (normalized.includes('agua')) return '#7dd3fc'; // Celeste claro
+        if (normalized.includes('jugos')) return '#f97316'; // Naranja
+        if (normalized.includes('isotonico')) return '#1d4ed8'; // Azul Fuerte (Blue-700)
+        if (normalized.includes('vinos')) return '#8b5cf6'; // Violeta
+        if (normalized.includes('energizantes')) return '#22c55e'; // Verde ajustado
+        if (normalized.includes('spirits')) return '#fdba74'; // Naranja claro
         return '#cbd5e1'; // Default gris
     };
 
@@ -101,6 +96,7 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
     
     // Share Calculation
     const shareVal = (client.ShareREFRESCOS || 0) * 100;
+    const tpRedVal = (client.TP_RED || 0) * 100;
 
     return (
         <div className="border-b border-gray-100 last:border-0">
@@ -138,73 +134,89 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
                 <div className="bg-slate-50 px-3 py-3 animate-in slide-in-from-top-2 duration-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         
-                        {/* LEFT: Info & Share Bar */}
-                        <div className="flex flex-col gap-3">
-                            {/* Metadata Compacta + TP RED */}
+                        {/* LEFT: Info & Bars */}
+                        <div className="flex flex-col gap-2">
+                            {/* Metadata Compacta */}
                             <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-100 shadow-sm">
-                                <div className="flex items-center gap-3 text-xs">
-                                    <div className="flex flex-col">
+                                <div className="flex items-center gap-3 text-xs w-full justify-around">
+                                    <div className="flex flex-col items-center">
                                         <span className="text-[8px] uppercase font-bold text-slate-400">Ruta</span>
                                         <span className="font-bold text-slate-700">{client.RutaVenta}</span>
                                     </div>
                                     <div className="w-px h-5 bg-slate-200"></div>
-                                    <div className="flex flex-col">
+                                    <div className="flex flex-col items-center">
                                         <span className="text-[8px] uppercase font-bold text-slate-400">Desarrollador</span>
                                         <span className="font-bold text-slate-700">{client.RutaDesarr}</span>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[8px] uppercase font-bold text-slate-400 flex items-center gap-1">
-                                        <Target className="h-2.5 w-2.5" /> TP RED
+                            </div>
+
+                             {/* TP RED Bar (Solo Dorado Sólido) */}
+                             <div className="bg-white p-2.5 rounded-lg border border-slate-100 shadow-sm">
+                                <div className="flex justify-between items-end mb-1">
+                                    <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+                                        <Trophy className="h-3 w-3 text-amber-500" /> TP RED
                                     </span>
-                                    <span className="font-bold text-slate-800 text-xs">{formatNumber(client.TP_RED, 2)}</span>
+                                    <span className="text-xs font-bold text-slate-800 leading-none">
+                                        {formatNumber(tpRedVal, 1)}%
+                                    </span>
+                                </div>
+                                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-100">
+                                    <div 
+                                        className="h-full rounded-full transition-all duration-500 ease-out"
+                                        style={{ 
+                                            width: `${Math.min(tpRedVal, 100)}%`,
+                                            backgroundColor: '#f59e0b' // Dorado Sólido (Amber-500)
+                                        }} 
+                                    />
                                 </div>
                             </div>
                             
-                            {/* Share Refrescos Bar (Rojo-Blanco-Negro) */}
-                            <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
-                                <div className="flex justify-between items-end mb-1.5">
+                            {/* Share Refrescos Bar (Solo Roja Sólida) */}
+                            <div className="bg-white p-2.5 rounded-lg border border-slate-100 shadow-sm">
+                                <div className="flex justify-between items-end mb-1">
                                     <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                                        <PieChart className="h-3 w-3" /> Share Refrescos
+                                        <PieChart className="h-3 w-3 text-red-500" /> Share Refrescos
                                     </span>
-                                    <span className="text-base font-bold text-slate-900 leading-none">
+                                    <span className="text-xs font-bold text-slate-900 leading-none">
                                         {formatNumber(shareVal, 1)}%
                                     </span>
                                 </div>
-                                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-100">
+                                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-100">
                                     <div 
                                         className="h-full rounded-full transition-all duration-500 ease-out"
                                         style={{ 
                                             width: `${Math.min(shareVal, 100)}%`,
-                                            background: 'linear-gradient(90deg, #dc2626 0%, #f3f4f6 50%, #000000 100%)' 
+                                            backgroundColor: '#dc2626' // Rojo Sólido (Red-600)
                                         }} 
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        {/* RIGHT: Mix Grid (Compact Cards) */}
+                        {/* RIGHT: Mix Grid (3 Columns) */}
                         <div>
                             <p className="text-[9px] uppercase font-bold text-slate-400 mb-2 flex items-center gap-1 tracking-wider">
                                 <Layers className="h-3 w-3" /> Mix Estratégico
                             </p>
                             
                             {categories.length > 0 ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <div className="grid grid-cols-3 gap-2">
                                     {categories.map((cat, idx) => {
                                         const percent = ((cat.value || 0) / (client.UC12mm || 1)) * 100;
                                         return (
-                                            <div key={cat.label} className="bg-white border border-slate-100 rounded-md p-2 shadow-sm flex flex-col justify-between h-12">
-                                                <div className="flex items-center gap-1.5">
+                                            <div key={cat.label} className="bg-white border border-slate-100 rounded-md p-2 shadow-sm flex flex-col justify-between h-14 hover:shadow-md transition-shadow">
+                                                <div className="flex items-center gap-1">
                                                     <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: getCategoryColor(cat.label) }}></div>
                                                     <span className="text-[9px] font-semibold text-slate-500 truncate">{cat.label}</span>
                                                 </div>
-                                                <div className="flex items-end justify-between mt-0.5">
-                                                    <span className="text-sm font-bold text-slate-800 leading-none">
+                                                {/* UC a la derecha y en la misma fila que el % */}
+                                                <div className="flex items-end justify-between w-full mt-1">
+                                                    <span className="text-xs font-bold text-slate-800 leading-none">
                                                         {formatNumber(percent, 1)}<span className="text-[8px] text-slate-400">%</span>
                                                     </span>
-                                                    <span className="text-[8px] font-medium text-slate-400">
-                                                        {formatNumber(cat.value, 0)}
+                                                    <span className="text-[9px] font-medium text-slate-400">
+                                                        {formatNumber(cat.value, 0)} UC
                                                     </span>
                                                 </div>
                                             </div>
@@ -517,26 +529,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                     <KpiCard 
                         title="Volumen (UC)" 
                         value={formatNumber(kpis.totalVol, 0)} 
-                        icon={<Package className="h-5 w-5 text-blue-600" />}
+                        icon={<Package className="h-4 w-4 text-blue-600" />}
                         trend={null}
                     />
                     <KpiCard 
                         title="var YTD" 
                         value={`${formatNumber(kpis.totalGrowth * 100, 1)}%`} 
-                        icon={kpis.totalGrowth >= 0 ? <TrendingUp className="h-5 w-5 text-green-600" /> : <TrendingDown className="h-5 w-5 text-red-600" />}
+                        icon={kpis.totalGrowth >= 0 ? <TrendingUp className="h-4 w-4 text-green-600" /> : <TrendingDown className="h-4 w-4 text-red-600" />}
                         trend={kpis.totalGrowth}
                         isPercent
                     />
                     <KpiCard 
                         title="Share Refrescos" 
                         value={`${formatNumber(kpis.avgShare * 100, 1)}%`} 
-                        icon={<PieChart className="h-5 w-5 text-purple-600" />}
+                        icon={<PieChart className="h-4 w-4 text-red-600" />}
                         trend={null}
                     />
                      <KpiCard 
                         title="TP RED Prom." 
                         value={`${formatNumber(kpis.avgTpRed * 100, 1)}%`} 
-                        icon={<CheckCircle className="h-5 w-5 text-emerald-600" />}
+                        icon={<Trophy className="h-4 w-4 text-amber-500" />}
                         trend={null}
                     />
                 </div>
