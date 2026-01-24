@@ -38,8 +38,8 @@ const HeaderTechPattern = () => (
             <g stroke="white" strokeWidth="1" fill="none" strokeOpacity="0.15">
                 
                 {/* --- SATELLITE ALLUSION (Top Left) --- */}
-                {/* Orbital Node with Panels */}
-                <g transform="translate(60, 35) rotate(-15)">
+                {/* Orbital Node with Panels - Reubicado para dar aire (Moved from 60,35 to 85,25) */}
+                <g transform="translate(85, 25) rotate(-15)">
                     {/* Solar Panels (Rectangles) */}
                     <rect x="-12" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
                     <rect x="4" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
