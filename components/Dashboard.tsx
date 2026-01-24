@@ -72,7 +72,7 @@ const CustomTreemapTooltip = ({ active, payload }: any) => {
                 <p className="text-xs font-bold text-gray-900 mb-1.5 leading-tight border-b border-gray-100 pb-1">
                     {data.name}
                 </p>
-                {/* Volumen */}
+                {/* Volumen con formato 5.340 */}
                 <div className="flex items-center justify-between">
                     <span className="text-[10px] text-gray-500 uppercase font-medium">Volumen</span>
                     <span className="text-sm font-bold text-blue-600">
@@ -471,15 +471,21 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
     const renderShareItem = (label: string, vol: number) => {
         const total = client.UC12mm || 0;
         const percent = total > 0 ? (vol / total) * 100 : 0;
-        const displayValue = formatNumber(percent, 1) + '%';
+        const displayPercent = formatNumber(percent, 1) + '%';
+        const displayVol = formatNumber(vol, 0);
         const isZero = percent < 0.05; 
 
         return (
             <div>
                 <span className="text-[9px] uppercase tracking-wide text-gray-400 block">{label}</span>
-                <span className={`text-xs font-semibold ${isZero ? 'text-red-500' : 'text-gray-700'}`}>
-                    {displayValue}
-                </span>
+                <div className="flex flex-col">
+                    <span className={`text-xs font-bold ${isZero ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {displayVol}
+                    </span>
+                    <span className={`text-[10px] font-medium ${isZero ? 'text-gray-300' : 'text-blue-600'}`}>
+                        {displayPercent}
+                    </span>
+                </div>
             </div>
         );
     };
@@ -517,10 +523,6 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                             </span>
                         </div>
                         
-                        <div>
-                            <span className="text-[10px] uppercase tracking-wide text-gray-400 block mb-0.5">TP</span>
-                            <span className="font-medium text-gray-700">{client.TP ? formatNumber(client.TP, 2) : '0,00'}</span>
-                        </div>
                         <div>
                             <span className="text-[10px] uppercase tracking-wide text-gray-400 block mb-0.5">TP %</span>
                             <span className="font-medium text-gray-700">
