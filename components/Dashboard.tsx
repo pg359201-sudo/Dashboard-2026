@@ -13,6 +13,81 @@ interface DashboardProps {
     onLogout: () => void;
 }
 
+// --- Local Components for Dashboard ---
+
+interface KpiCardProps {
+    title: string;
+    value: string;
+    icon: React.ReactNode;
+    trend: number | null;
+    isPercent?: boolean;
+}
+
+const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon, trend }) => {
+    const showTrend = trend !== null && trend !== undefined;
+    const isPositive = (trend || 0) >= 0;
+    const trendColor = isPositive ? 'text-green-600' : 'text-red-600';
+    const TrendIcon = isPositive ? TrendingUp : TrendingDown;
+    
+    return (
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-2">
+                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{title}</h3>
+                 <div className="p-2 bg-gray-50 rounded-lg">{icon}</div>
+            </div>
+            <div className="flex flex-col gap-1">
+                <span className="text-2xl font-bold text-gray-900 tracking-tight">{value}</span>
+                {showTrend && (
+                    <div className={`flex items-center gap-1 text-xs font-bold ${trendColor}`}>
+                        <TrendIcon className="h-3 w-3" />
+                        <span>{formatNumber(Math.abs(trend!) * 100, 1)}%</span>
+                        <span className="text-gray-400 font-normal ml-1">vs año ant.</span>
+                    </div>
+                )}
+                 {!showTrend && (
+                    <div className="text-xs text-gray-400 font-medium mt-1">
+                        Métrica general
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
+    const isGrowth = (client.Var2025vs2024 || 0) >= 0;
+    
+    return (
+        <div className="px-5 py-3 hover:bg-blue-50/50 transition-colors flex items-center justify-between group cursor-default">
+            <div className="flex items-center gap-4 overflow-hidden">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-sm border ${
+                    isGrowth ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'
+                }`}>
+                    {client.RazonSocial.substring(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-gray-900 truncate" title={client.RazonSocial}>{client.RazonSocial}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                        <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-medium text-[10px] uppercase border border-gray-200">
+                            {client.GEC || 'OTROS'}
+                        </span>
+                        <span className="text-gray-300">•</span>
+                        <span className="truncate max-w-[120px]">{client.GrupoCanal}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="text-right pl-4 flex flex-col items-end">
+                <p className="text-sm font-bold text-gray-900">{formatNumber(client.UC12mm, 0)} <span className="text-[10px] text-gray-400 font-normal">UC</span></p>
+                <div className={`flex items-center gap-1 text-xs font-bold ${isGrowth ? 'text-green-600' : 'text-red-600'}`}>
+                    {isGrowth ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    {formatNumber(Math.abs(client.Var2025vs2024 || 0) * 100, 1)}%
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Custom render for Treemap cells (The colored rectangles)
 const CustomizedTreemapContent = (props: any) => {
     const { x, y, width, height, index, name } = props;
@@ -227,7 +302,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
             <header className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-20 flex justify-between items-center shadow-sm">
                 <div>
                     {/* Updated Font */}
-                    <h1 className="text-lg font-tech font-bold text-gray-900 leading-tight tracking-wider uppercase">
+                    <h1 className="text-base font-tech font-bold text-gray-900 leading-tight tracking-wider uppercase">
                         SalesComander <span className="text-blue-600">Pro</span>
                     </h1>
                     <div className="flex items-center gap-2 mt-1">
@@ -442,121 +517,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
             </main>
 
             <ChatAssistant data={filteredData} />
-        </div>
-    );
-};
-
-// Compact KpiCard
-const KpiCard: React.FC<{ title: string, value: string, icon: React.ReactNode, trend: number | null, isPercent?: boolean }> = ({ title, value, icon, trend, isPercent }) => (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-start justify-between hover:shadow-md transition-shadow">
-        <div>
-            <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wide truncate">{title}</p>
-            <h4 className="text-xl font-bold text-gray-900 mt-0.5">{value}</h4>
-            {trend !== null && (
-                <div className={`text-[10px] mt-1.5 font-medium flex items-center gap-0.5 ${trend >= 0 ? 'text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full inline-flex' : 'text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full inline-flex'}`}>
-                    {trend >= 0 ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
-                    <span>{trend >= 0 ? '+' : ''}{formatNumber(trend * 100, 1)}% vs AA</span>
-                </div>
-            )}
-        </div>
-        <div className="p-2 bg-gray-50 rounded-lg border border-gray-100 shrink-0">
-            {icon}
-        </div>
-    </div>
-);
-
-const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const renderShareItem = (label: string, vol: number) => {
-        const total = client.UC12mm || 0;
-        const percent = total > 0 ? (vol / total) * 100 : 0;
-        const displayPercent = formatNumber(percent, 1) + '%';
-        const displayVol = formatNumber(vol, 0);
-        const isZero = percent < 0.05; 
-
-        return (
-            <div className="py-1">
-                <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold block mb-0.5">{label}</span>
-                <div className="flex flex-col">
-                    <span className={`text-xs font-medium leading-none mb-0.5 ${isZero ? 'text-gray-300' : 'text-slate-700'}`}>
-                        {displayVol}
-                    </span>
-                    <span className={`text-[10px] font-medium ${isZero ? 'text-gray-300' : 'text-blue-500'}`}>
-                        {displayPercent}
-                    </span>
-                </div>
-            </div>
-        );
-    };
-
-    return (
-        <div className="group transition-colors hover:bg-gray-50">
-            <button 
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-full text-left px-5 py-4 flex items-center justify-between"
-            >
-                <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${client.Var2025vs2024 >= 0 ? 'bg-green-500' : 'bg-red-500'}`}>
-                        {client.RazonSocial.charAt(0)}
-                    </div>
-                    <div>
-                        <div className="font-semibold text-gray-800 text-sm">{client.RazonSocial}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">Vol: <strong>{formatNumber(client.UC12mm, 0)} UC</strong></div>
-                    </div>
-                </div>
-                <div className={`p-1 rounded-full bg-gray-100 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                    <ChevronDown className="h-4 w-4" />
-                </div>
-            </button>
-            {isOpen && (
-                <div className="px-5 pb-4 pl-16 text-sm">
-                    <div className="grid grid-cols-2 gap-y-3 gap-x-6 pt-2 border-t border-gray-100">
-                        <div>
-                            <span className="text-[10px] uppercase tracking-wide text-gray-400 block mb-0.5">Ruta Venta</span>
-                            <span className="font-medium text-gray-700">{client.RutaVenta}</span>
-                        </div>
-                        <div>
-                            <span className="text-[10px] uppercase tracking-wide text-gray-400 block mb-0.5">Var YTD</span>
-                            <span className={`font-medium ${client.Var2025vs2024 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {formatNumber(client.Var2025vs2024 * 100, 1)}%
-                            </span>
-                        </div>
-                        
-                        <div>
-                            <span className="text-[10px] uppercase tracking-wide text-gray-400 block mb-0.5">TP %</span>
-                            <span className="font-medium text-gray-700">
-                                {client.TP_RED ? formatNumber(client.TP_RED * 100, 1) : '0,0'}%
-                            </span>
-                        </div>
-
-                        <div className="col-span-2">
-                            <span className="text-[10px] uppercase tracking-wide text-gray-400 block mb-1">Share Refrescos</span>
-                            <div className="flex items-center gap-2">
-                                <div className="w-full bg-gray-100 rounded-full h-2">
-                                    <div 
-                                        className="bg-blue-600 h-2 rounded-full transition-all duration-500" 
-                                        style={{ width: `${Math.min(client.ShareREFRESCOS * 100, 100)}%` }}
-                                    ></div>
-                                </div>
-                                <span className="text-xs font-bold text-gray-700 w-10 text-right">
-                                    {formatNumber(client.ShareREFRESCOS * 100, 0)}%
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="col-span-2 pt-2 border-t border-gray-100 border-dashed mt-1">
-                             <div className="grid grid-cols-3 gap-y-4 gap-x-2">
-                                {renderShareItem('Aguas', client.VolAgua)}
-                                {renderShareItem('Jugos', client.VolJugos)}
-                                {renderShareItem('Energy', client.VolEnergizantes)}
-                                {renderShareItem('Spirits', client.VolSpirits)}
-                                {renderShareItem('Vinos', client.VolVinos)}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
