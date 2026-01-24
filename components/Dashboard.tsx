@@ -61,7 +61,7 @@ const ClientRow: React.FC<{ client: SalesRecord; onClick: (c: SalesRecord) => vo
     return (
         <div 
             onClick={() => onClick(client)}
-            className="px-5 py-3 hover:bg-blue-50 transition-colors flex items-center justify-between group cursor-pointer border-l-4 border-transparent hover:border-blue-500"
+            className="px-5 py-4 hover:bg-blue-50 transition-colors flex items-center justify-between group cursor-pointer border-l-4 border-transparent hover:border-blue-500"
         >
             <div className="flex items-center gap-4 overflow-hidden">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-sm border ${
@@ -69,15 +69,9 @@ const ClientRow: React.FC<{ client: SalesRecord; onClick: (c: SalesRecord) => vo
                 }`}>
                     {client.RazonSocial.substring(0, 2).toUpperCase()}
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 flex flex-col justify-center">
                     <p className="text-sm font-bold text-gray-900 truncate group-hover:text-blue-700 transition-colors" title={client.RazonSocial}>{client.RazonSocial}</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                        <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-medium text-[10px] uppercase border border-gray-200">
-                            {client.GEC || 'OTROS'}
-                        </span>
-                        <span className="text-gray-300">•</span>
-                        <span className="truncate max-w-[120px]">{client.GrupoCanal}</span>
-                    </div>
+                    {/* Información secundaria eliminada a petición del usuario (GEC/Canal) */}
                 </div>
             </div>
             
@@ -99,6 +93,8 @@ interface ClientDetailModalProps {
 }
 
 const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, onClose }) => {
+    const isPositive = (client.Var2025vs2024 || 0) >= 0;
+
     // Preparar datos para el gráfico de barras (Mix de Categorías)
     const categories = [
         { label: 'Colas', value: client.VolColas },
@@ -120,11 +116,18 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, onClose }
                 {/* Header */}
                 <div className="bg-slate-50 border-b border-slate-200 p-6 flex justify-between items-start shrink-0">
                     <div>
-                         <div className="flex items-center gap-2 mb-2">
-                            <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200 uppercase tracking-wide">{client.GEC}</span>
-                            <span className="text-slate-400 text-xs">•</span>
-                            <span className="text-slate-500 text-xs font-medium uppercase">{client.GrupoCanal}</span>
+                         {/* UPDATE: Reemplazado GEC/Canal por Resumen de Volumen y Crecimiento */}
+                         <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-sm">
+                                <Package className="h-3.5 w-3.5 text-blue-600" />
+                                <span className="text-xs font-bold text-slate-700">{formatNumber(client.UC12mm, 0)} UC</span>
+                            </div>
+                             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border shadow-sm ${isPositive ? 'bg-green-50 border-green-100 text-green-700' : 'bg-red-50 border-red-100 text-red-700'}`}>
+                                {isPositive ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+                                <span className="text-xs font-bold">{isPositive ? '+' : ''}{formatNumber(Math.abs(client.Var2025vs2024) * 100, 1)}%</span>
+                            </div>
                         </div>
+
                         <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight mb-2">{client.RazonSocial}</h2>
                         <div className="text-xs text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
                             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-300"></span> Ruta: <b>{client.RutaVenta}</b></span>
