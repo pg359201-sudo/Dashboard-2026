@@ -15,7 +15,7 @@ const PageBackground = () => (
     </div>
 );
 
-// 2. Header Tech Pattern (Trazos tecnológicos SOLO en el encabezado oscuro - Versión Enriquecida)
+// 2. Header Tech Pattern (Trazos tecnológicos SOLO en el encabezado oscuro - Versión Enriquecida con Satélite y Cohete)
 const HeaderTechPattern = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -36,6 +36,36 @@ const HeaderTechPattern = () => (
 
             {/* Circuit Lines - Trazos Complejos y Tecnológicos */}
             <g stroke="white" strokeWidth="1" fill="none" strokeOpacity="0.15">
+                
+                {/* --- SATELLITE ALLUSION (Top Left) --- */}
+                {/* Orbital Node with Panels */}
+                <g transform="translate(60, 35) rotate(-15)">
+                    {/* Solar Panels (Rectangles) */}
+                    <rect x="-12" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
+                    <rect x="4" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
+                    {/* Body */}
+                    <circle cx="0" cy="0" r="3" fill="white" fillOpacity="0.2" />
+                    {/* Connection lines to grid */}
+                    <line x1="0" y1="3" x2="0" y2="15" strokeWidth="0.5" strokeDasharray="2 1" />
+                    {/* Radio Waves (Communication) */}
+                    <path d="M -4 -6 Q 0 -10 4 -6" strokeWidth="0.5" opacity="0.5" />
+                    <path d="M -7 -9 Q 0 -15 7 -9" strokeWidth="0.5" opacity="0.3" />
+                </g>
+
+
+                {/* --- ROCKET / LAUNCH TRAJECTORY (Right Side) --- */}
+                {/* Launch Path */}
+                <path d="M calc(100% - 60px) 160 Q calc(100% - 50px) 100 calc(100% - 25px) 40" 
+                      stroke="white" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.2" fill="none" />
+                
+                {/* The Rocket Vehicle (Delta Shape at end of path) */}
+                <g transform="translate(-25, 40)"> {/* Positioned relative to right edge roughly */}
+                    <path d="M 100% 0 L calc(100% - 3px) 6 L calc(100% + 3px) 6 Z" 
+                          transform="translate(-5, 0) rotate(15)" 
+                          fill="white" fillOpacity="0.4" stroke="none" />
+                </g>
+
+
                 {/* --- Left Side Complex --- */}
                 {/* Bus Lines (Parallel Traces) */}
                 <path d="M -20 40 H 30 L 50 60 V 140 L 30 160" />
@@ -98,19 +128,20 @@ const HeaderTechPattern = () => (
 const ShieldLogo = () => (
     <svg viewBox="0 0 300 300" className="h-48 w-auto drop-shadow-2xl hover:scale-105 transition-transform duration-500">
         <defs>
-            {/* --- USA COLORS METALLIC --- */}
-            {/* Old Glory Blue Metallic */}
+            {/* --- USA COLORS METALLIC (UPDATED BRIGHTNESS) --- */}
+            
+            {/* Old Glory Blue Metallic - BRIGHTER */}
             <linearGradient id="usBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#3c3b6e" />
-                <stop offset="50%" stopColor="#202050" />
-                <stop offset="100%" stopColor="#0a0a20" />
+                <stop offset="0%" stopColor="#4b4b96" /> {/* Lighter Start */}
+                <stop offset="50%" stopColor="#282860" /> {/* Richer Mid */}
+                <stop offset="100%" stopColor="#0a0a25" />
             </linearGradient>
 
-            {/* Old Glory Red Metallic */}
+            {/* Old Glory Red Metallic - BRIGHTER */}
             <linearGradient id="usRed" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#b22234" />
-                <stop offset="40%" stopColor="#801010" />
-                <stop offset="60%" stopColor="#e03040" />
+                <stop offset="0%" stopColor="#cf283c" /> {/* Brighter Base */}
+                <stop offset="40%" stopColor="#901212" />
+                <stop offset="60%" stopColor="#f23849" /> {/* Brighter Highlight */}
                 <stop offset="100%" stopColor="#600000" />
             </linearGradient>
 
@@ -254,6 +285,18 @@ const ShieldLogo = () => (
                  <g transform="translate(100, 52) scale(1.25)"> {/* Scaled up for Emphasis */}
                      {/* 1. Connection to grip (Neck) */}
                      <rect x="-2.5" y="2" width="5" height="5" fill="url(#goldHilt)" />
+
+                     {/* NEW: Sun-Ray Lashes (Subtle) */}
+                     <g stroke="#d97706" strokeWidth="0.6" strokeLinecap="round" opacity="0.8">
+                         {/* Center Ray */}
+                         <line x1="0" y1="-11" x2="0" y2="-15" />
+                         {/* Right Rays */}
+                         <line x1="6" y1="-10" x2="9" y2="-13.5" />
+                         <line x1="11" y1="-6.5" x2="15" y2="-8.5" />
+                         {/* Left Rays */}
+                         <line x1="-6" y1="-10" x2="-9" y2="-13.5" />
+                         <line x1="-11" y1="-6.5" x2="-15" y2="-8.5" />
+                     </g>
 
                      {/* 2. The Eye Setting (Gold) - More pronounced */}
                      <path d="M -15 0 Q 0 -11 15 0 Q 0 11 -15 0 Z" 
