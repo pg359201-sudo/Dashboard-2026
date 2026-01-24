@@ -8,10 +8,19 @@ export const generateSalesAnalysis = async (
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
-        // MODIFICACIÓN: Se elimina el límite de 50 registros.
-        // Se envía la totalidad de los datos para aprovechar la ventana de contexto de Gemini Flash.
-        // Esto permite análisis reales de "El peor cliente", "Total compañía", etc.
-        const dataString = JSON.stringify(contextData);
+        // PRE-PROCESAMIENTO: Limpieza de nombres de GEC para el chat
+        // Se eliminan los prefijos numéricos (ej: "51 - ORO" -> "ORO") para que la IA solo vea el nombre limpio.
+        const cleanedData = contextData.map(record => {
+            const newRecord = { ...record };
+            if (newRecord.GEC) {
+                // Regex: Elimina digitos al inicio seguidos de un guión y espacios opcionales
+                newRecord.GEC = newRecord.GEC.replace(/^\d+\s*-\s*/, '');
+            }
+            return newRecord;
+        });
+
+        // Se envía la totalidad de los datos (ya limpios)
+        const dataString = JSON.stringify(cleanedData);
 
         // MODIFICACIÓN: Prompt de Sistema "Analista Experto"
         // ACTUALIZACIÓN: Se prohíben tablas y se exige formato de bullets limpios con estructura jerárquica.
@@ -29,6 +38,7 @@ export const generateSalesAnalysis = async (
            - **FICHA DESTACADA**: Si preguntas por un "Mayor/Menor/Mejor", presenta al ganador claramente separado del resto usando negritas para etiquetas.
            - **LISTAS LIMPIAS**: Para listados secundarios, usa viñetas (*) compactas.
            - **USO DE EMOJIS**: Usa emojis relevantes (🏆, 📉, ⚠️, 📊) al inicio de los títulos para guia visual.
+           - **NOMENCLATURA GEC**: Usa siempre el nombre limpio del GEC (ej: "ORO", "DIAMANTE") sin números.
            
            Ejemplo de Estructura Ideal:
            
