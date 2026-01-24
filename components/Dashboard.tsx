@@ -476,13 +476,13 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
         const isZero = percent < 0.05; 
 
         return (
-            <div>
-                <span className="text-[9px] uppercase tracking-wide text-gray-400 block">{label}</span>
+            <div className="py-1">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold block mb-0.5">{label}</span>
                 <div className="flex flex-col">
-                    <span className={`text-xs font-bold ${isZero ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <span className={`text-xs font-medium leading-none mb-0.5 ${isZero ? 'text-gray-300' : 'text-slate-700'}`}>
                         {displayVol}
                     </span>
-                    <span className={`text-[10px] font-medium ${isZero ? 'text-gray-300' : 'text-blue-600'}`}>
+                    <span className={`text-[10px] font-medium ${isZero ? 'text-gray-300' : 'text-blue-500'}`}>
                         {displayPercent}
                     </span>
                 </div>
@@ -546,7 +546,7 @@ const ClientRow: React.FC<{ client: SalesRecord }> = ({ client }) => {
                         </div>
 
                         <div className="col-span-2 pt-2 border-t border-gray-100 border-dashed mt-1">
-                             <div className="grid grid-cols-3 gap-y-2 gap-x-1">
+                             <div className="grid grid-cols-3 gap-y-4 gap-x-2">
                                 {renderShareItem('Aguas', client.VolAgua)}
                                 {renderShareItem('Jugos', client.VolJugos)}
                                 {renderShareItem('Energy', client.VolEnergizantes)}
