@@ -9,12 +9,13 @@ export const generateSalesAnalysis = async (
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
         // PRE-PROCESAMIENTO: Limpieza de nombres de GEC para el chat
-        // Se eliminan los prefijos numéricos (ej: "51 - ORO" -> "ORO") para que la IA solo vea el nombre limpio.
+        // Se aplica a TODOS los GEC detectados (ej: "58 - LATON" -> "LATON")
         const cleanedData = contextData.map(record => {
             const newRecord = { ...record };
             if (newRecord.GEC) {
-                // Regex: Elimina digitos al inicio seguidos de un guión y espacios opcionales
-                newRecord.GEC = newRecord.GEC.replace(/^\d+\s*-\s*/, '');
+                // Regex mejorado: Elimina espacios iniciales opcionales, digitos, guiones y espacios excedentes.
+                // Cubre "51 - ORO", "50-DIAMANTE", "99 - CUSTOMIZADO", etc.
+                newRecord.GEC = newRecord.GEC.replace(/^\s*\d+\s*[-]\s*/, '').trim();
             }
             return newRecord;
         });
@@ -23,7 +24,7 @@ export const generateSalesAnalysis = async (
         const dataString = JSON.stringify(cleanedData);
 
         // MODIFICACIÓN: Prompt de Sistema "Analista Experto"
-        // ACTUALIZACIÓN: Se prohíben tablas y se exige formato de bullets limpios con estructura jerárquica.
+        // ACTUALIZACIÓN: Se añaden las reglas explícitas para todos los GEC listados.
         const systemInstruction = `Actúa como un Analista de Información Experto y Senior.
         Tu objetivo es proveer inteligencia de negocios precisa basada en los datos adjuntos.
 
@@ -38,12 +39,22 @@ export const generateSalesAnalysis = async (
            - **FICHA DESTACADA**: Si preguntas por un "Mayor/Menor/Mejor", presenta al ganador claramente separado del resto usando negritas para etiquetas.
            - **LISTAS LIMPIAS**: Para listados secundarios, usa viñetas (*) compactas.
            - **USO DE EMOJIS**: Usa emojis relevantes (🏆, 📉, ⚠️, 📊) al inicio de los títulos para guia visual.
-           - **NOMENCLATURA GEC**: Usa siempre el nombre limpio del GEC (ej: "ORO", "DIAMANTE") sin números.
            
-           Ejemplo de Estructura Ideal:
+           - **NORMALIZACIÓN DE GEC (SEGMENTACIÓN)**:
+             Usa SIEMPRE solo el nombre textual, ignorando códigos numéricos.
+             Ejemplos de normalización obligatoria:
+             * "50 - DIAMANTE" -> "DIAMANTE"
+             * "51 - ORO" -> "ORO"
+             * "52 - PLATA" -> "PLATA"
+             * "53 - BRONCE" -> "BRONCE"
+             * "58 - LATON" -> "LATON"
+             * "99 - CUSTOMIZADO" -> "CUSTOMIZADO"
+           
+           Ejemplo de Estructura de Respuesta Ideal:
            
            ## 🏆 [Concepto Principal]
            **[NOMBRE DEL CLIENTE]**
+           * **Segmento:** [NOMBRE GEC LIMPIO]
            * **Crecimiento:** [Valor]%
            * **Volumen:** [Valor] UC
            
