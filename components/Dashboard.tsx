@@ -3,7 +3,7 @@ import { SalesRecord, FilterState } from '../types';
 import { 
     Treemap, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, ChevronUp, BarChart3, Layers } from 'lucide-react';
+import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, ChevronUp, BarChart3, Layers, Zap } from 'lucide-react';
 import { COLORS, formatNumber } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 import { loadFromStorage } from '../services/dataService';
@@ -67,18 +67,29 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
     // Preparar datos para el listado de Mix
     const categories = useMemo(() => {
         if (!isExpanded) return [];
+        
+        // Categorías a EXCLUIR según solicitud: Colas, Sabores, Saborizadas
+        const excludedCategories = ['Colas', 'Sabores', 'Saborizadas'];
+
         return [
             { label: 'Colas', value: client.VolColas },
             { label: 'Sabores', value: client.VolSabores },
+            { label: 'Saborizadas', value: client.VolSaborizadas }, // Added for mapping but filtered below
             { label: 'Agua', value: client.VolAgua },
             { label: 'Jugos', value: client.VolJugos },
             { label: 'Isotonico', value: client.VolIsotonico },
             { label: 'Energizantes', value: client.VolEnergizantes },
             { label: 'Spirits', value: client.VolSpirits },
             { label: 'Vinos', value: client.VolVinos },
-        ].sort((a, b) => (b.value || 0) - (a.value || 0)).filter(c => (c.value || 0) > 0);
+        ]
+        .filter(c => !excludedCategories.includes(c.label)) // FILTRO DE EXCLUSIÓN
+        .sort((a, b) => (b.value || 0) - (a.value || 0))
+        .filter(c => (c.value || 0) > 0);
     }, [isExpanded, client]);
     
+    // Share Calculation
+    const shareVal = (client.ShareREFRESCOS || 0) * 100;
+
     return (
         <div className="border-b border-gray-100 last:border-0">
             {/* Header (Always Visible) */}
@@ -112,65 +123,76 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
 
             {/* Expanded Content (Minimalist List) */}
             {isExpanded && (
-                <div className="bg-slate-50 px-5 py-4 animate-in slide-in-from-top-2 duration-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-slate-50 px-5 py-5 animate-in slide-in-from-top-2 duration-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         
-                        {/* Info Column */}
-                        <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-4 text-xs text-slate-500">
+                        {/* LEFT: Info & Share Bar */}
+                        <div className="flex flex-col gap-5">
+                            {/* Metadata */}
+                            <div className="flex items-center gap-6 text-xs text-slate-500">
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase font-bold text-slate-400">Ruta Venta</span>
-                                    <span className="font-semibold text-slate-700">{client.RutaVenta}</span>
+                                    <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Ruta Venta</span>
+                                    <span className="font-bold text-slate-700 mt-0.5">{client.RutaVenta}</span>
                                 </div>
                                 <div className="w-px h-6 bg-slate-200"></div>
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase font-bold text-slate-400">Desarrollador</span>
-                                    <span className="font-semibold text-slate-700">{client.RutaDesarr}</span>
+                                    <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Desarrollador</span>
+                                    <span className="font-bold text-slate-700 mt-0.5">{client.RutaDesarr}</span>
                                 </div>
                             </div>
                             
-                            <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm max-w-[200px]">
-                                <span className="text-xs font-medium text-slate-500">Share Refrescos</span>
-                                <span className="text-sm font-bold text-purple-600">{formatNumber((client.ShareREFRESCOS || 0) * 100, 1)}%</span>
+                            {/* Share Refrescos Bar */}
+                            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                <div className="flex justify-between items-end mb-2">
+                                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+                                        <PieChart className="h-3 w-3" /> Share Refrescos
+                                    </span>
+                                    <span className="text-xl font-bold text-purple-600 leading-none">
+                                        {formatNumber(shareVal, 1)}%
+                                    </span>
+                                </div>
+                                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500 ease-out"
+                                        style={{ width: `${Math.min(shareVal, 100)}%` }} 
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Mix List Column (No Bars) */}
+                        {/* RIGHT: Mix Grid (Minimalist Cards, NOT TABLE) */}
                         <div>
-                            <div className="flex justify-between items-end mb-2 pb-1 border-b border-slate-200">
-                                <p className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
-                                    <Layers className="h-3 w-3" /> Mix de Categorías
-                                </p>
-                                <div className="flex gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                                    <span>Vol (UC)</span>
-                                    <span className="w-10 text-right">Peso %</span>
-                                </div>
-                            </div>
+                            <p className="text-[10px] uppercase font-bold text-slate-400 mb-3 flex items-center gap-1 tracking-wider">
+                                <Layers className="h-3 w-3" /> Mix Estratégico
+                            </p>
                             
-                            <div className="space-y-0.5">
-                                {categories.slice(0, 6).map((cat, idx) => {
-                                    const percent = ((cat.value || 0) / (client.UC12mm || 1)) * 100;
-                                    return (
-                                        <div key={cat.label} className="flex items-center justify-between py-1.5 hover:bg-slate-100/50 rounded px-1 transition-colors">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
-                                                <span className="text-[11px] font-medium text-slate-600 truncate max-w-[100px]">{cat.label}</span>
+                            {categories.length > 0 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    {categories.map((cat, idx) => {
+                                        const percent = ((cat.value || 0) / (client.UC12mm || 1)) * 100;
+                                        return (
+                                            <div key={cat.label} className="bg-white border border-slate-100 rounded-lg p-2.5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-16">
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[(idx + 2) % COLORS.length] }}></div>
+                                                    <span className="text-[10px] font-semibold text-slate-500 truncate">{cat.label}</span>
+                                                </div>
+                                                <div className="flex items-end justify-between mt-1">
+                                                    <span className="text-lg font-bold text-slate-800 leading-none">
+                                                        {formatNumber(percent, 0)}<span className="text-[10px] text-slate-400">%</span>
+                                                    </span>
+                                                    <span className="text-[9px] font-medium text-slate-400">
+                                                        {formatNumber(cat.value, 0)} uc
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
-                                                <span className="text-[11px] font-bold text-slate-800">{formatNumber(cat.value, 0)}</span>
-                                                <span className="text-[10px] font-medium text-slate-500 w-10 text-right bg-slate-200/50 rounded px-1">
-                                                    {formatNumber(percent, 1)}%
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                {categories.length > 6 && (
-                                    <p className="text-[9px] text-slate-400 text-center mt-2 italic">
-                                        ... y {categories.length - 6} categorías más
-                                    </p>
-                                )}
-                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-xs text-slate-400 italic bg-slate-100 p-3 rounded-lg text-center">
+                                    Sin volumen en categorías estratégicas.
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
