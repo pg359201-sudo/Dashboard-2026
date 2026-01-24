@@ -20,19 +20,12 @@ const HeaderTechPattern = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
-                <pattern id="header-grid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <circle cx="1" cy="1" r="0.5" fill="white" opacity="0.15" />
-                </pattern>
-                
                 <linearGradient id="line-fade" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="white" stopOpacity="0" />
                     <stop offset="50%" stopColor="white" stopOpacity="0.3" />
                     <stop offset="100%" stopColor="white" stopOpacity="0" />
                 </linearGradient>
             </defs>
-
-            {/* Grid de puntos muy sutil para textura tech */}
-            <rect width="100%" height="100%" fill="url(#header-grid)" />
 
             {/* Circuit Lines - Trazos Complejos y Tecnológicos */}
             <g stroke="white" strokeWidth="1" fill="none" strokeOpacity="0.15">
