@@ -121,9 +121,10 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
                 </div>
                 
                 <div className="text-right pl-4 flex flex-col items-end">
-                    <p className="text-sm font-bold text-gray-900">{formatNumber(client.UC12mm, 0)} <span className="text-[10px] text-gray-400 font-normal">UC</span></p>
-                    <div className={`flex items-center gap-1 text-xs font-bold ${isGrowth ? 'text-green-600' : 'text-red-600'}`}>
-                        {isGrowth ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    {/* UPDATED: Reduced font sizes for values */}
+                    <p className="text-xs font-bold text-gray-900">{formatNumber(client.UC12mm, 0)} <span className="text-[9px] text-gray-400 font-normal">UC</span></p>
+                    <div className={`flex items-center gap-1 text-[10px] font-bold ${isGrowth ? 'text-green-600' : 'text-red-600'}`}>
+                        {isGrowth ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
                         {formatNumber(Math.abs(client.Var2025vs2024 || 0) * 100, 1)}%
                     </div>
                 </div>
