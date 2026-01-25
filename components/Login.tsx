@@ -73,9 +73,9 @@ const HeaderTechPattern = () => (
                                 <circle cx="0" cy="0" r="3" fill="white" fillOpacity="0.2" />
                                 {/* Connection lines to grid - Modified (y2=16) and Opacity 0.13 */}
                                 <line x1="0" y1="3" x2="0" y2="16" strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.13" />
-                                {/* Radio Waves (Communication) - Adjusted to 0.13 opacity as requested */}
-                                <path d="M -4 -6 Q 0 -10 4 -6" strokeWidth="1" strokeOpacity="0.13" />
-                                <path d="M -7 -9 Q 0 -15 7 -9" strokeWidth="1" strokeOpacity="0.13" />
+                                {/* Radio Waves (Communication) - Adjusted to 0.12 opacity as requested */}
+                                <path d="M -4 -6 Q 0 -10 4 -6" strokeWidth="1" strokeOpacity="0.12" />
+                                <path d="M -7 -9 Q 0 -15 7 -9" strokeWidth="1" strokeOpacity="0.12" />
                             </g>
                         </g>
                     </g>
