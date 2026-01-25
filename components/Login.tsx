@@ -292,7 +292,7 @@ const ShieldLogo = () => (
             {/* 3. CENTRAL SWORD (Replaces Diamond) */}
             <g transform="translate(0, 5)" filter="url(#dropShadow)">
                  {/* Blade - Wider and more defined. INCREASED CONTRAST STROKE */}
-                 <path d="M90 85 L110 85 L100 218 Z" fill="url(#swordBlade)" stroke="#0f172a" strokeWidth="1.5" />
+                 <path d="M90 85 L110 85 L100 218 Z" fill="url(#swordBlade)" stroke="#334155" strokeWidth="1" />
                  {/* Central Ridge of Blade */}
                  <path d="M100 85 L100 218" stroke="#ffffff" strokeWidth="0.75" opacity="0.9" />
 
