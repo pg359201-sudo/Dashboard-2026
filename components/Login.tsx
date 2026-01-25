@@ -113,9 +113,22 @@ const HeaderTechPattern = () => (
 
                 {/* Floating Logic Nodes (dots) */}
                 <circle cx="20%" cy="20%" r="1" fill="white" opacity="0.1" />
-                <circle cx="80%" cy="25%" r="1" fill="white" opacity="0.1" />
+                
+                {/* Right Top Node - Animated (Extended Range, Low Brightness, 16s) */}
+                <circle cx="80%" cy="25%" r="1.5" fill="white" opacity="0.1">
+                    <animate attributeName="opacity" values="0.1; 0.4; 0.1" dur="16s" repeatCount="indefinite" />
+                    <animate attributeName="cx" values="80%; 90%; 80%" dur="16s" repeatCount="indefinite" />
+                    <animate attributeName="cy" values="25%; 15%; 25%" dur="16s" repeatCount="indefinite" />
+                </circle>
+
                 <circle cx="15%" cy="80%" r="1" fill="white" opacity="0.1" />
-                <circle cx="85%" cy="75%" r="1" fill="white" opacity="0.1" />
+
+                {/* Right Bottom Node - Animated (Extended Range, Low Brightness, 16s) */}
+                <circle cx="85%" cy="75%" r="1.5" fill="white" opacity="0.1">
+                    <animate attributeName="opacity" values="0.1; 0.4; 0.1" dur="16s" repeatCount="indefinite" begin="8s"/>
+                    <animate attributeName="cx" values="85%; 95%; 85%" dur="16s" repeatCount="indefinite" begin="8s"/>
+                    <animate attributeName="cy" values="75%; 85%; 75%" dur="16s" repeatCount="indefinite" begin="8s"/>
+                </circle>
 
                 {/* Linea decorativa inferior */}
                 <path d="M 0 100% L 100% 100%" stroke="url(#line-fade)" strokeWidth="0.5" />
