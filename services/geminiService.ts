@@ -66,7 +66,7 @@ export const generateSalesAnalysis = async (
         - UC12mm: Volumen Anual (Cajas Unitarias).
         - Var2025vs2024: Crecimiento YTD (decimal, ej: 0.10 es 10%).
         - ShareREFRESCOS: Participación de mercado.
-        - TP: Precio Promedio.
+        - TP_RED: Ejecución en Punto de Venta (Porcentaje, ej: 0.95 es 95%). Indica calidad de ejecución.
         `;
 
         const response = await ai.models.generateContent({
