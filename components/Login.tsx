@@ -324,13 +324,13 @@ const ShieldLogo = () => (
                          <animate attributeName="stroke-width" values="0.5; 2.2; 0.5" dur="2s" repeatCount="indefinite" />
                          
                          {/* Center Ray */}
-                         <line x1="0" y1="-11" x2="0" y2="-13.5" />
+                         <line x1="0" y1="-11" x2="0" y2="-12.8" />
                          {/* Right Rays */}
-                         <line x1="6" y1="-10" x2="7.8" y2="-12.1" />
-                         <line x1="11" y1="-6.5" x2="13.2" y2="-7.6" />
+                         <line x1="6" y1="-10" x2="7.2" y2="-11.4" />
+                         <line x1="11" y1="-6.5" x2="12.5" y2="-7.2" />
                          {/* Left Rays */}
-                         <line x1="-6" y1="-10" x2="-7.8" y2="-12.1" />
-                         <line x1="-11" y1="-6.5" x2="-13.2" y2="-7.6" />
+                         <line x1="-6" y1="-10" x2="-7.2" y2="-11.4" />
+                         <line x1="-11" y1="-6.5" x2="-12.5" y2="-7.2" />
                      </g>
 
                      {/* 2. The Eye Setting (Gold) - More pronounced */}
