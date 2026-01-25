@@ -265,8 +265,15 @@ const ShieldLogo = () => (
                      {/* 1. Connection to grip (Neck) */}
                      <rect x="-2.5" y="2" width="5" height="5" fill="url(#goldHilt)" />
 
-                     {/* NEW: Sun-Ray Lashes (Subtle) */}
+                     {/* NEW: Sun-Ray Lashes (Pestañas) - ACTIVATED ANIMATION */}
+                     {/* Ahora las pestañas brillan en DORADO INTENSO al ritmo de la pupila */}
                      <g stroke="#d97706" strokeWidth="0.6" strokeLinecap="round" opacity="0.8">
+                         {/* Animación Sincronizada: Gold (Reposo) -> Gold Bright (Activo) -> Gold (Reposo) */}
+                         {/* Usamos #fbbf24 (Amber-400) para un dorado brillante pero controlado */}
+                         <animate attributeName="stroke" values="#d97706; #fbbf24; #fbbf24; #d97706; #d97706" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
+                         {/* Animación Grosor: Fino -> Grueso (Energía) -> Fino */}
+                         <animate attributeName="stroke-width" values="0.6; 1.5; 1.5; 0.6; 0.6" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
+                         
                          {/* Center Ray */}
                          <line x1="0" y1="-11" x2="0" y2="-15" />
                          {/* Right Rays */}
