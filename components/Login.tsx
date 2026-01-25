@@ -316,26 +316,14 @@ const ShieldLogo = () => (
                      {/* 1. Connection to grip (Neck) */}
                      <rect x="-2.5" y="2" width="5" height="5" fill="url(#goldHilt)" />
 
-                     {/* NEW: Sun-Ray Lashes (Pestañas) - ACTIVATED ANIMATION */}
-                     {/* Ahora las pestañas brillan en DORADO INTENSO al ritmo de la pupila */}
-                     <g stroke="#d97706" strokeWidth="0.6" strokeLinecap="round" opacity="0.8">
-                         {/* Animación Sincronizada: Fluid Breathing (Intense version: Larger range, slightly faster) */}
-                         <animate attributeName="stroke" values="#d97706; #b45309; #d97706" dur="2s" repeatCount="indefinite" />
-                         <animate attributeName="stroke-width" values="0.5; 2.2; 0.5" dur="2s" repeatCount="indefinite" />
-                         
-                         {/* Center Ray */}
-                         <line x1="0" y1="-11" x2="0" y2="-12.8" />
-                         {/* Right Rays */}
-                         <line x1="6" y1="-10" x2="7.2" y2="-11.4" />
-                         <line x1="11" y1="-6.5" x2="12.5" y2="-7.2" />
-                         {/* Left Rays */}
-                         <line x1="-6" y1="-10" x2="-7.2" y2="-11.4" />
-                         <line x1="-11" y1="-6.5" x2="-12.5" y2="-7.2" />
-                     </g>
-
-                     {/* 2. The Eye Setting (Gold) - More pronounced */}
+                     {/* 2. The Eye Setting (Gold) - More pronounced with Breathing Outline */}
+                     {/* UPDATE: Reduced Intensity of Animation (Color and Width) */}
                      <path d="M -15 0 Q 0 -11 15 0 Q 0 11 -15 0 Z" 
-                           fill="url(#goldHilt)" stroke="#451a03" strokeWidth="0.8" />
+                           fill="url(#goldHilt)" stroke="#451a03" strokeWidth="0.8">
+                           {/* Animation: Outline Glows synchronously with pupil - SUBTLER */}
+                           <animate attributeName="stroke" values="#451a03; #b45309; #451a03" dur="2s" repeatCount="indefinite" />
+                           <animate attributeName="stroke-width" values="0.8; 1.5; 0.8" dur="2s" repeatCount="indefinite" />
+                     </path>
                      
                      {/* 3. The Sclera (Dark Tech Background) */}
                      <path d="M -11 0 Q 0 -7 11 0 Q 0 7 -11 0 Z" 
@@ -351,9 +339,9 @@ const ShieldLogo = () => (
 
                      {/* 5. The Pupil (AI Core) - Pulsing Animation */}
                      <circle cx="0" cy="0" r="3" fill="url(#aiEyeGlow)">
-                         {/* Animación: Thinking Effect (Intense: 0.4 to 1 opacity, 2.5 to 5.5 size, 2s) */}
+                         {/* Animación: Thinking Effect (Reduced: 0.4 to 1 opacity, 2.5 to 4.5 size) */}
                          <animate attributeName="opacity" values="0.4; 1; 0.4" dur="2s" repeatCount="indefinite" />
-                         <animate attributeName="r" values="2.5; 5.5; 2.5" dur="2s" repeatCount="indefinite" />
+                         <animate attributeName="r" values="2.5; 4.5; 2.5" dur="2s" repeatCount="indefinite" />
                      </circle>
                      
                      {/* 6. Center Glint (Pure White) */}
