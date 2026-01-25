@@ -21,27 +21,28 @@ interface KpiCardProps {
     icon: React.ReactNode;
     trend: number | null;
     isPercent?: boolean;
+    showTrendLegend?: boolean;
 }
 
-const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon, trend }) => {
+const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon, trend, showTrendLegend = true }) => {
     const showTrend = trend !== null && trend !== undefined;
     const isPositive = (trend || 0) >= 0;
     const trendColor = isPositive ? 'text-green-600' : 'text-red-600';
     const TrendIcon = isPositive ? TrendingUp : TrendingDown;
     
     return (
-        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-center mb-1 gap-2">
+        <div className="bg-white p-2.5 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-center mb-0.5 gap-2">
                  <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">{title}</h3>
                  <div className="p-0.5 bg-white rounded-lg">{icon}</div>
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-0">
                 <span className="text-lg font-bold text-gray-900 tracking-tight">{value}</span>
                 {showTrend && (
                     <div className={`flex items-center gap-1 text-[10px] font-bold ${trendColor}`}>
                         <TrendIcon className="h-3 w-3" />
                         <span>{formatNumber(Math.abs(trend!) * 100, 1)}%</span>
-                        <span className="text-gray-400 font-normal ml-1">vs año ant.</span>
+                        {showTrendLegend && <span className="text-gray-400 font-normal ml-1">vs año ant.</span>}
                     </div>
                 )}
             </div>
@@ -537,7 +538,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         title="var YTD" 
                         value={`${formatNumber(kpis.totalGrowth * 100, 1)}%`} 
                         icon={kpis.totalGrowth >= 0 ? <TrendingUp className="h-4 w-4 text-green-600" /> : <TrendingDown className="h-4 w-4 text-red-600" />}
-                        trend={kpis.totalGrowth}
+                        trend={null}
                         isPercent
                     />
                     <KpiCard 
