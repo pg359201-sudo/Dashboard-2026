@@ -2,8 +2,18 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SalesComander Pro</title>
+    
+    <!-- iOS & PWA Configuration -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SalesCo Pro">
+
+    <!-- Favicon & Apple Touch Icon (Shield Logo SVG) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='white'/%3E%3Cpath d='M100 80 L412 80 L412 180 Q412 400 256 480 Q100 400 100 180 Z' fill='%23f8fafc' stroke='%23334155' stroke-width='12'/%3E%3Cpath d='M150 180 L190 180 L190 420' stroke='%23ef4444' stroke-width='40'/%3E%3Cpath d='M236 180 L276 180 L276 460' stroke='%23ef4444' stroke-width='40'/%3E%3Cpath d='M322 180 L362 180 L362 420' stroke='%23ef4444' stroke-width='40'/%3E%3Cpath d='M100 80 H412 V180 H100 Z' fill='%23172554'/%3E%3Cpath d='M256 180 L256 460' stroke='%23334155' stroke-width='16'/%3E%3Crect x='206' y='160' width='100' height='20' rx='5' fill='%23d97706'/%3E%3Crect x='246' y='100' width='20' height='60' fill='%2378350f'/%3E%3Ccircle cx='256' cy='90' r='35' fill='%23fbbf24' stroke='%2378350f' stroke-width='5'/%3E%3Ccircle cx='256' cy='90' r='15' fill='%2306b6d4'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='white'/%3E%3Cpath d='M100 80 L412 80 L412 180 Q412 400 256 480 Q100 400 100 180 Z' fill='%23f8fafc' stroke='%23334155' stroke-width='12'/%3E%3Cpath d='M150 180 L190 180 L190 420' stroke='%23ef4444' stroke-width='40'/%3E%3Cpath d='M236 180 L276 180 L276 460' stroke='%23ef4444' stroke-width='40'/%3E%3Cpath d='M322 180 L362 180 L362 420' stroke='%23ef4444' stroke-width='40'/%3E%3Cpath d='M100 80 H412 V180 H100 Z' fill='%23172554'/%3E%3Cpath d='M256 180 L256 460' stroke='%23334155' stroke-width='16'/%3E%3Crect x='206' y='160' width='100' height='20' rx='5' fill='%23d97706'/%3E%3Crect x='246' y='100' width='20' height='60' fill='%2378350f'/%3E%3Ccircle cx='256' cy='90' r='35' fill='%23fbbf24' stroke='%2378350f' stroke-width='5'/%3E%3Ccircle cx='256' cy='90' r='15' fill='%2306b6d4'/%3E%3C/svg%3E">
+
     <!-- Import Orbitron Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,6 +71,9 @@
       body {
         background-color: hsl(210, 40%, 98%);
         color: hsl(222.2, 84%, 4.9%);
+        /* Disable text selection and tap highlights for native app feel */
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
       }
     </style>
   <script type="importmap">
