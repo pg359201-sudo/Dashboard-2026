@@ -30,15 +30,15 @@ const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon, trend }) => {
     const TrendIcon = isPositive ? TrendingUp : TrendingDown;
     
     return (
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-center mb-2 gap-2">
-                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">{title}</h3>
-                 <div className="p-1 bg-white rounded-lg">{icon}</div>
+        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-center mb-1 gap-2">
+                 <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">{title}</h3>
+                 <div className="p-0.5 bg-white rounded-lg">{icon}</div>
             </div>
-            <div className="flex flex-col gap-1">
-                <span className="text-2xl font-bold text-gray-900 tracking-tight">{value}</span>
+            <div className="flex flex-col gap-0.5">
+                <span className="text-lg font-bold text-gray-900 tracking-tight">{value}</span>
                 {showTrend && (
-                    <div className={`flex items-center gap-1 text-xs font-bold ${trendColor}`}>
+                    <div className={`flex items-center gap-1 text-[10px] font-bold ${trendColor}`}>
                         <TrendIcon className="h-3 w-3" />
                         <span>{formatNumber(Math.abs(trend!) * 100, 1)}%</span>
                         <span className="text-gray-400 font-normal ml-1">vs año ant.</span>
