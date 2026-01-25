@@ -290,8 +290,8 @@ const ShieldLogo = () => (
                      {/* Ahora las pestañas brillan en DORADO INTENSO al ritmo de la pupila */}
                      <g stroke="#d97706" strokeWidth="0.6" strokeLinecap="round" opacity="0.8">
                          {/* Animación Sincronizada: Gold (Reposo) -> Gold Bright (Activo) -> Gold (Reposo) */}
-                         {/* Usamos #f59e0b (Amber-500) para un dorado menos brillante (menos intenso que el 400 anterior) */}
-                         <animate attributeName="stroke" values="#d97706; #f59e0b; #f59e0b; #d97706; #d97706" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
+                         {/* Usamos #ea8c15 para un dorado más apagado (menos brillo que el f59e0b anterior) */}
+                         <animate attributeName="stroke" values="#d97706; #ea8c15; #ea8c15; #d97706; #d97706" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
                          {/* Animación Grosor: Fino -> Grueso (Energía) -> Fino */}
                          <animate attributeName="stroke-width" values="0.6; 1.5; 1.5; 0.6; 0.6" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
                          
