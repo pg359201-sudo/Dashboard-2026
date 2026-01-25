@@ -32,17 +32,38 @@ const HeaderTechPattern = () => (
                 
                 {/* --- SATELLITE ALLUSION (Top Left) --- */}
                 {/* Orbital Node with Panels - Reubicado para dar aire (Moved from 60,35 to 85,25) */}
-                <g transform="translate(85, 25) rotate(-15)">
-                    {/* Solar Panels (Rectangles) */}
-                    <rect x="-12" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
-                    <rect x="4" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
-                    {/* Body */}
-                    <circle cx="0" cy="0" r="3" fill="white" fillOpacity="0.2" />
-                    {/* Connection lines to grid */}
-                    <line x1="0" y1="3" x2="0" y2="15" strokeWidth="0.5" strokeDasharray="2 1" />
-                    {/* Radio Waves (Communication) */}
-                    <path d="M -4 -6 Q 0 -10 4 -6" strokeWidth="0.5" opacity="0.5" />
-                    <path d="M -7 -9 Q 0 -15 7 -9" strokeWidth="0.5" opacity="0.3" />
+                {/* ANIMATION ADDED: Nested group to handle rotation animation while keeping position */}
+                <g transform="translate(85, 25)">
+                    {/* NUEVO: Movimiento de traslación Izquierda-Derecha (Orbiting) cada 10s */}
+                    <animateTransform 
+                        attributeName="transform" 
+                        type="translate" 
+                        values="80 25; 95 25; 80 25" 
+                        dur="10s" 
+                        repeatCount="indefinite" 
+                    />
+
+                    <g>
+                        {/* Movimiento MÁS PRONUNCIADO: Rotación de -30 a 10 grados y vuelta (40 grados de barrido) */}
+                        <animateTransform 
+                            attributeName="transform" 
+                            type="rotate" 
+                            values="-30 0 0; 10 0 0; -30 0 0" 
+                            dur="5s" 
+                            repeatCount="indefinite" 
+                        />
+                        
+                        {/* Solar Panels (Rectangles) */}
+                        <rect x="-12" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
+                        <rect x="4" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
+                        {/* Body */}
+                        <circle cx="0" cy="0" r="3" fill="white" fillOpacity="0.2" />
+                        {/* Connection lines to grid */}
+                        <line x1="0" y1="3" x2="0" y2="15" strokeWidth="0.5" strokeDasharray="2 1" />
+                        {/* Radio Waves (Communication) */}
+                        <path d="M -4 -6 Q 0 -10 4 -6" strokeWidth="0.5" opacity="0.5" />
+                        <path d="M -7 -9 Q 0 -15 7 -9" strokeWidth="0.5" opacity="0.3" />
+                    </g>
                 </g>
 
                 {/* --- Left Side Complex --- */}
@@ -269,8 +290,8 @@ const ShieldLogo = () => (
                      {/* Ahora las pestañas brillan en DORADO INTENSO al ritmo de la pupila */}
                      <g stroke="#d97706" strokeWidth="0.6" strokeLinecap="round" opacity="0.8">
                          {/* Animación Sincronizada: Gold (Reposo) -> Gold Bright (Activo) -> Gold (Reposo) */}
-                         {/* Usamos #fbbf24 (Amber-400) para un dorado brillante pero controlado */}
-                         <animate attributeName="stroke" values="#d97706; #fbbf24; #fbbf24; #d97706; #d97706" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
+                         {/* Usamos #f59e0b (Amber-500) para un dorado menos brillante (menos intenso que el 400 anterior) */}
+                         <animate attributeName="stroke" values="#d97706; #f59e0b; #f59e0b; #d97706; #d97706" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
                          {/* Animación Grosor: Fino -> Grueso (Energía) -> Fino */}
                          <animate attributeName="stroke-width" values="0.6; 1.5; 1.5; 0.6; 0.6" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
                          
