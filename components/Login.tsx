@@ -34,35 +34,50 @@ const HeaderTechPattern = () => (
                 {/* Orbital Node with Panels - Reubicado para dar aire (Moved from 60,35 to 85,25) */}
                 {/* ANIMATION ADDED: Nested group to handle rotation animation while keeping position */}
                 <g transform="translate(85, 25)">
-                    {/* NUEVO: Movimiento de traslación Izquierda-Derecha (Orbiting) cada 10s */}
+                    {/* NUEVO: Movimiento de traslación Izquierda-Derecha (Orbiting) - RALENTIZADO AUN MAS (27s) */}
+                    {/* ACTUALIZADO: Rango ampliado de 70 a 100 para más recorrido */}
                     <animateTransform 
                         attributeName="transform" 
                         type="translate" 
-                        values="80 25; 95 25; 80 25" 
-                        dur="10s" 
+                        values="70 25; 100 25; 70 25" 
+                        dur="27s" 
                         repeatCount="indefinite" 
                     />
 
+                    {/* NEW: Vertical Floating (Subtle Bobbing) */}
                     <g>
-                        {/* Movimiento MÁS PRONUNCIADO: Rotación de -30 a 10 grados y vuelta (40 grados de barrido) */}
                         <animateTransform 
                             attributeName="transform" 
-                            type="rotate" 
-                            values="-30 0 0; 10 0 0; -30 0 0" 
-                            dur="5s" 
+                            type="translate" 
+                            values="0 -2; 0 2; 0 -2" 
+                            dur="6s" 
                             repeatCount="indefinite" 
                         />
-                        
-                        {/* Solar Panels (Rectangles) */}
-                        <rect x="-12" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
-                        <rect x="4" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
-                        {/* Body */}
-                        <circle cx="0" cy="0" r="3" fill="white" fillOpacity="0.2" />
-                        {/* Connection lines to grid */}
-                        <line x1="0" y1="3" x2="0" y2="15" strokeWidth="0.5" strokeDasharray="2 1" />
-                        {/* Radio Waves (Communication) */}
-                        <path d="M -4 -6 Q 0 -10 4 -6" strokeWidth="0.5" opacity="0.5" />
-                        <path d="M -7 -9 Q 0 -15 7 -9" strokeWidth="0.5" opacity="0.3" />
+
+                        <g>
+                            {/* Movimiento MÁS PRONUNCIADO: Rotación de -30 a 10 grados y vuelta (40 grados de barrido) */}
+                            <animateTransform 
+                                attributeName="transform" 
+                                type="rotate" 
+                                values="-30 0 0; 10 0 0; -30 0 0" 
+                                dur="5s" 
+                                repeatCount="indefinite" 
+                            />
+                            
+                            {/* Visual Elements Scaled Down (0.85) */}
+                            <g transform="scale(0.85)">
+                                {/* Solar Panels (Rectangles) */}
+                                <rect x="-12" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
+                                <rect x="4" y="-3" width="8" height="6" fill="white" fillOpacity="0.1" strokeWidth="0.5" />
+                                {/* Body */}
+                                <circle cx="0" cy="0" r="3" fill="white" fillOpacity="0.2" />
+                                {/* Connection lines to grid - Modified (y2=16) and Opacity 0.13 */}
+                                <line x1="0" y1="3" x2="0" y2="16" strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.13" />
+                                {/* Radio Waves (Communication) */}
+                                <path d="M -4 -6 Q 0 -10 4 -6" strokeWidth="0.5" opacity="0.5" />
+                                <path d="M -7 -9 Q 0 -15 7 -9" strokeWidth="0.5" opacity="0.3" />
+                            </g>
+                        </g>
                     </g>
                 </g>
 
@@ -141,67 +156,63 @@ const HeaderTechPattern = () => (
 const ShieldLogo = () => (
     <svg viewBox="0 0 300 300" className="h-48 w-auto drop-shadow-2xl hover:scale-105 transition-transform duration-500">
         <defs>
-            {/* --- USA COLORS METALLIC (UPDATED BRIGHTNESS) --- */}
+            {/* --- USA COLORS REFERENCE STYLE --- */}
             
-            {/* Old Glory Blue Metallic - BRIGHTER */}
-            <linearGradient id="usBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#4b4b96" /> {/* Lighter Start */}
-                <stop offset="50%" stopColor="#282860" /> {/* Richer Mid */}
-                <stop offset="100%" stopColor="#0a0a25" />
+            {/* Blue - Lighter (Less Dark) as requested */}
+            {/* Moved from Blue-900/Slate-900 to Blue-700/Blue-950 */}
+            <linearGradient id="usBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#1d4ed8" /> {/* Blue 700 (More vibrant) */}
+                <stop offset="100%" stopColor="#172554" /> {/* Blue 950 (Deep but not black) */}
             </linearGradient>
 
-            {/* Old Glory Red Metallic - BRIGHTER */}
+            {/* Red - Standard Flag Red with slight shading (Not Metallic) */}
             <linearGradient id="usRed" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#cf283c" /> {/* Brighter Base */}
-                <stop offset="40%" stopColor="#901212" />
-                <stop offset="60%" stopColor="#f23849" /> {/* Brighter Highlight */}
-                <stop offset="100%" stopColor="#600000" />
+                 <stop offset="0%" stopColor="#ef4444" /> {/* Red 500 */}
+                 <stop offset="100%" stopColor="#991b1b" /> {/* Red 800 (Shadow) */}
             </linearGradient>
 
-            {/* Silver/White Stripes */}
+            {/* Silver/White Stripes - Subtle gradient */}
             <linearGradient id="usWhite" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#e2e8f0" />
-                <stop offset="20%" stopColor="#ffffff" />
-                <stop offset="50%" stopColor="#cbd5e1" />
-                <stop offset="80%" stopColor="#ffffff" />
-                <stop offset="100%" stopColor="#94a3b8" />
+                <stop offset="0%" stopColor="#f8fafc" />
+                <stop offset="100%" stopColor="#cbd5e1" />
             </linearGradient>
 
-            {/* Heavy Chrome Border */}
+            {/* Border - METALLIC BUT LESS REFLECTIVE (Toned down) */}
+            {/* Removed pure white stops to reduce glare */}
             <linearGradient id="chromeBorder" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ffffff" />
-                <stop offset="20%" stopColor="#94a3b8" />
-                <stop offset="50%" stopColor="#475569" />
-                <stop offset="80%" stopColor="#cbd5e1" />
-                <stop offset="100%" stopColor="#1e293b" />
+                <stop offset="0%" stopColor="#e2e8f0" /> {/* Slate 200 */}
+                <stop offset="25%" stopColor="#94a3b8" /> {/* Slate 400 */}
+                <stop offset="50%" stopColor="#f1f5f9" /> {/* Slate 100 (Soft Highlight) */}
+                <stop offset="75%" stopColor="#64748b" /> {/* Slate 500 */}
+                <stop offset="100%" stopColor="#334155" /> {/* Slate 700 (Dark Metal) */}
             </linearGradient>
 
-            {/* SWORD GRADIENTS - IMPROVED CONTRAST */}
+            {/* SWORD GRADIENTS - INCREASED CONTRAST */}
+            {/* Darker edges to stand out against white background */}
             <linearGradient id="swordBlade" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#64748b" /> {/* Darker Edge */}
-                <stop offset="50%" stopColor="#ffffff" /> {/* Ridge Highlight */}
-                <stop offset="50%" stopColor="#cbd5e1" /> {/* Ridge Shadow - Sharp transition */}
-                <stop offset="100%" stopColor="#475569" /> {/* Darker Edge */}
+                <stop offset="0%" stopColor="#334155" /> {/* Slate 700 (Gunmetal Edge) */}
+                <stop offset="50%" stopColor="#f8fafc" /> {/* Very bright center ridge */}
+                <stop offset="50%" stopColor="#cbd5e1" /> {/* Ridge Shadow */}
+                <stop offset="100%" stopColor="#1e293b" /> {/* Slate 800 (Darker Edge) */}
             </linearGradient>
 
+            {/* Hilt - Bronze/Orange Gold */}
             <linearGradient id="goldHilt" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#fef08a" />
-                <stop offset="30%" stopColor="#d97706" />
-                <stop offset="70%" stopColor="#b45309" />
-                <stop offset="100%" stopColor="#78350f" />
+                <stop offset="0%" stopColor="#fbbf24" /> {/* Amber 400 */}
+                <stop offset="50%" stopColor="#d97706" /> {/* Amber 600 */}
+                <stop offset="100%" stopColor="#78350f" /> {/* Amber 900 */}
             </linearGradient>
             
-            {/* AI EYE GRADIENT - UPDATED FOR MORE EMPHASIS */}
+            {/* AI EYE GRADIENT - Bright Cyan/Blue Gem */}
             <radialGradient id="aiEyeGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                <stop offset="0%" stopColor="#ffffff" /> {/* Core White */}
-                <stop offset="40%" stopColor="#22d3ee" /> {/* Cyan Bright */}
-                <stop offset="100%" stopColor="#0284c7" /> {/* Cyan Deep */}
+                <stop offset="0%" stopColor="#e0f2fe" /> {/* White/Cyan Center */}
+                <stop offset="40%" stopColor="#06b6d4" /> {/* Cyan 500 */}
+                <stop offset="100%" stopColor="#0891b2" /> {/* Cyan 600 */}
             </radialGradient>
 
-            {/* Glass Shine */}
+            {/* Glass Shine Overlay */}
             <linearGradient id="glassShine" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="white" stopOpacity="0.6"/>
-                <stop offset="40%" stopColor="white" stopOpacity="0.1"/>
+                <stop offset="0%" stopColor="white" stopOpacity="0.4"/>
                 <stop offset="100%" stopColor="white" stopOpacity="0"/>
             </linearGradient>
 
@@ -241,7 +252,7 @@ const ShieldLogo = () => (
             
             {/* 1. BASE CHROME FRAME */}
             <path d="M10 20 L190 20 L190 70 Q190 180 100 240 Q10 180 10 70 Z" 
-                  fill="url(#chromeBorder)" stroke="#1e293b" strokeWidth="1" />
+                  fill="url(#chromeBorder)" stroke="#334155" strokeWidth="1" />
 
             {/* 2. INNER CONTENT CONTAINER (Masked) */}
             <g>
@@ -260,7 +271,7 @@ const ShieldLogo = () => (
                     <rect x="163" y="80" width="22" height="200" fill="url(#usRed)" />
 
                     {/* The Chief (Top Blue Section) */}
-                    <rect x="0" y="0" width="200" height="85" fill="url(#usBlue)" stroke="#e2e8f0" strokeWidth="2" />
+                    <rect x="0" y="0" width="200" height="85" fill="url(#usBlue)" stroke="#334155" strokeWidth="1" />
                     
                     {/* Stars on the Chief - Moved slightly to accommodate sword */}
                     <g fill="white" filter="url(#insetShadow)">
@@ -275,13 +286,13 @@ const ShieldLogo = () => (
                  </g>
                  
                  {/* Inner Stroke definition to clean up edges */}
-                 <use href="#innerShieldPath" fill="none" stroke="#1e293b" strokeWidth="2" opacity="0.5" />
+                 <use href="#innerShieldPath" fill="none" stroke="#334155" strokeWidth="1" opacity="0.3" />
             </g>
 
             {/* 3. CENTRAL SWORD (Replaces Diamond) */}
             <g transform="translate(0, 5)" filter="url(#dropShadow)">
-                 {/* Blade - Wider and more defined */}
-                 <path d="M90 85 L110 85 L100 218 Z" fill="url(#swordBlade)" stroke="#334155" strokeWidth="1" />
+                 {/* Blade - Wider and more defined. INCREASED CONTRAST STROKE */}
+                 <path d="M90 85 L110 85 L100 218 Z" fill="url(#swordBlade)" stroke="#0f172a" strokeWidth="1.5" />
                  {/* Central Ridge of Blade */}
                  <path d="M100 85 L100 218" stroke="#ffffff" strokeWidth="0.75" opacity="0.9" />
 
