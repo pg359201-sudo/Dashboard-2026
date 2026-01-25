@@ -15,7 +15,7 @@ const PageBackground = () => (
     </div>
 );
 
-// 2. Header Tech Pattern (Trazos tecnológicos SOLO en el encabezado oscuro - Versión Enriquecida con Satélite y Cohete)
+// 2. Header Tech Pattern (Trazos tecnológicos SOLO en el encabezado oscuro - Versión Limpia sin Platillo)
 const HeaderTechPattern = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -44,20 +44,6 @@ const HeaderTechPattern = () => (
                     <path d="M -4 -6 Q 0 -10 4 -6" strokeWidth="0.5" opacity="0.5" />
                     <path d="M -7 -9 Q 0 -15 7 -9" strokeWidth="0.5" opacity="0.3" />
                 </g>
-
-
-                {/* --- ROCKET / LAUNCH TRAJECTORY (Right Side) --- */}
-                {/* Launch Path */}
-                <path d="M calc(100% - 60px) 160 Q calc(100% - 50px) 100 calc(100% - 25px) 40" 
-                      stroke="white" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.2" fill="none" />
-                
-                {/* The Rocket Vehicle (Delta Shape at end of path) */}
-                <g transform="translate(-25, 40)"> {/* Positioned relative to right edge roughly */}
-                    <path d="M 100% 0 L calc(100% - 3px) 6 L calc(100% + 3px) 6 Z" 
-                          transform="translate(-5, 0) rotate(15)" 
-                          fill="white" fillOpacity="0.4" stroke="none" />
-                </g>
-
 
                 {/* --- Left Side Complex --- */}
                 {/* Bus Lines (Parallel Traces) */}
@@ -309,9 +295,10 @@ const ShieldLogo = () => (
 
                      {/* 5. The Pupil (AI Core) - Pulsing Animation */}
                      <circle cx="0" cy="0" r="3" fill="url(#aiEyeGlow)">
-                         {/* More intense pulse */}
-                         <animate attributeName="r" values="2.8;3.8;2.8" dur="2.5s" repeatCount="indefinite" />
-                         <animate attributeName="opacity" values="0.9;1;0.9" dur="2.5s" repeatCount="indefinite" />
+                         {/* Animación: Prende (rápido), Mantiene (unos segundos), Apaga (rápido), Espera */}
+                         {/* Cycle 5s: 0.5s ON, 2.5s HOLD, 0.5s OFF, 1.5s WAIT */}
+                         <animate attributeName="opacity" values="0.3; 1; 1; 0.3; 0.3" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
+                         <animate attributeName="r" values="2.5; 4.5; 4.5; 2.5; 2.5" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
                      </circle>
                      
                      {/* 6. Center Glint (Pure White) */}
