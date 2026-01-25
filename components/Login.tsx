@@ -313,11 +313,9 @@ const ShieldLogo = () => (
                      {/* NEW: Sun-Ray Lashes (Pestañas) - ACTIVATED ANIMATION */}
                      {/* Ahora las pestañas brillan en DORADO INTENSO al ritmo de la pupila */}
                      <g stroke="#d97706" strokeWidth="0.6" strokeLinecap="round" opacity="0.8">
-                         {/* Animación Sincronizada: Gold (Reposo) -> Gold Bright (Activo) -> Gold (Reposo) */}
-                         {/* ACTUALIZACIÓN: Menos brillo en el estado activo (#b45309 en lugar de #ea8c15) */}
-                         <animate attributeName="stroke" values="#d97706; #b45309; #b45309; #d97706; #d97706" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
-                         {/* Animación Grosor: Fino -> Grueso (Energía) -> Fino */}
-                         <animate attributeName="stroke-width" values="0.6; 1.5; 1.5; 0.6; 0.6" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
+                         {/* Animación Sincronizada: Fluid Breathing (Intense version: Larger range, slightly faster) */}
+                         <animate attributeName="stroke" values="#d97706; #b45309; #d97706" dur="2s" repeatCount="indefinite" />
+                         <animate attributeName="stroke-width" values="0.5; 2.2; 0.5" dur="2s" repeatCount="indefinite" />
                          
                          {/* Center Ray */}
                          <line x1="0" y1="-11" x2="0" y2="-15" />
@@ -347,10 +345,9 @@ const ShieldLogo = () => (
 
                      {/* 5. The Pupil (AI Core) - Pulsing Animation */}
                      <circle cx="0" cy="0" r="3" fill="url(#aiEyeGlow)">
-                         {/* Animación: Prende (rápido), Mantiene (unos segundos), Apaga (rápido), Espera */}
-                         {/* Cycle 5s: 0.5s ON, 2.5s HOLD, 0.5s OFF, 1.5s WAIT */}
-                         <animate attributeName="opacity" values="0.3; 1; 1; 0.3; 0.3" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
-                         <animate attributeName="r" values="2.5; 4.5; 4.5; 2.5; 2.5" keyTimes="0; 0.1; 0.6; 0.7; 1" dur="5s" repeatCount="indefinite" />
+                         {/* Animación: Thinking Effect (Intense: 0.4 to 1 opacity, 2.5 to 5.5 size, 2s) */}
+                         <animate attributeName="opacity" values="0.4; 1; 0.4" dur="2s" repeatCount="indefinite" />
+                         <animate attributeName="r" values="2.5; 5.5; 2.5" dur="2s" repeatCount="indefinite" />
                      </circle>
                      
                      {/* 6. Center Glint (Pure White) */}
