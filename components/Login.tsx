@@ -246,6 +246,9 @@ const ShieldLogo = () => (
 
             {/* Clip Path for the Shield Shape to cut stripes */}
             <path id="innerShieldPath" d="M25 35 L175 35 L175 75 Q175 165 100 220 Q25 165 25 75 Z" />
+
+            {/* Tiny Star Definition */}
+            <path id="tinyStar" d="M0 -2.2 L0.7 -0.7 L2.2 -0.7 L1.1 0.3 L1.5 1.8 L0 1.1 L-1.5 1.8 L-1.1 0.3 L-2.2 -0.7 L-0.7 -0.7 Z" />
         </defs>
 
         <g transform="translate(50, 20)" filter="url(#dropShadow)">
@@ -273,15 +276,18 @@ const ShieldLogo = () => (
                     {/* The Chief (Top Blue Section) */}
                     <rect x="0" y="0" width="200" height="85" fill="url(#usBlue)" stroke="#334155" strokeWidth="1" />
                     
-                    {/* Stars on the Chief - Moved slightly to accommodate sword */}
-                    <g fill="white" filter="url(#insetShadow)">
-                        {/* Left Stars */}
-                        <path transform="translate(45, 45) scale(0.6)" d="M0 -15 L4 -4 L15 -4 L6 4 L9 15 L0 9 L-9 15 L-6 4 L-15 -4 L-4 -4 Z" />
-                        <path transform="translate(30, 65) scale(0.4)" d="M0 -15 L4 -4 L15 -4 L6 4 L9 15 L0 9 L-9 15 L-6 4 L-15 -4 L-4 -4 Z" />
-                        
-                        {/* Right Stars */}
-                        <path transform="translate(155, 45) scale(0.6)" d="M0 -15 L4 -4 L15 -4 L6 4 L9 15 L0 9 L-9 15 L-6 4 L-15 -4 L-4 -4 Z" />
-                        <path transform="translate(170, 65) scale(0.4)" d="M0 -15 L4 -4 L15 -4 L6 4 L9 15 L0 9 L-9 15 L-6 4 L-15 -4 L-4 -4 Z" />
+                    {/* Stars on the Chief - US Flag Style Grid */}
+                    <g fill="white" opacity="0.25">
+                         {Array.from({ length: 5 }).map((_, r) => (
+                             Array.from({ length: r % 2 !== 0 ? 9 : 10 }).map((_, c) => (
+                                 <use 
+                                    key={`s-${r}-${c}`} 
+                                    href="#tinyStar" 
+                                    x={15 + c * 19 + (r % 2 !== 0 ? 9.5 : 0)} 
+                                    y={15 + r * 14} 
+                                />
+                             ))
+                         ))}
                     </g>
                  </g>
                  
