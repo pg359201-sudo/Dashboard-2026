@@ -318,10 +318,11 @@ const ShieldLogo = () => (
 
                      {/* 2. The Eye Setting (Gold) - More pronounced with Breathing Outline */}
                      {/* UPDATE: Reduced Intensity slightly as requested (Less impactful than previous step) */}
+                     {/* UPDATE 2: Intermediate color between Amber 600 and 700 (#c26607) */}
                      <path d="M -15 0 Q 0 -11 15 0 Q 0 11 -15 0 Z" 
                            fill="url(#goldHilt)" stroke="#451a03" strokeWidth="0.8">
                            {/* Animation: Outline Glows synchronously with pupil - MODERATE */}
-                           <animate attributeName="stroke" values="#451a03; #d97706; #451a03" dur="2s" repeatCount="indefinite" />
+                           <animate attributeName="stroke" values="#451a03; #c26607; #451a03" dur="2s" repeatCount="indefinite" />
                            <animate attributeName="stroke-width" values="0.8; 1.8; 0.8" dur="2s" repeatCount="indefinite" />
                      </path>
                      
