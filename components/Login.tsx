@@ -403,7 +403,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     </div>
 
                     <h1 className="text-xl font-tech font-bold text-white mb-2 relative z-10 tracking-wider uppercase -mt-4 whitespace-nowrap">SalesComander Pro</h1>
-                    <p className="text-slate-300 text-sm relative z-10">Sistema de Gestión Táctica</p>
+                    <p className="text-slate-300 text-xs relative z-10">Reconocimiento y Despliegue Táctico</p>
                 </div>
                 
                 <form onSubmit={handleSubmit} className="p-8">
