@@ -317,12 +317,12 @@ const ShieldLogo = () => (
                      <rect x="-2.5" y="2" width="5" height="5" fill="url(#goldHilt)" />
 
                      {/* 2. The Eye Setting (Gold) - More pronounced with Breathing Outline */}
-                     {/* UPDATE: Reduced Intensity of Animation (Color and Width) */}
+                     {/* UPDATE: Reduced Intensity slightly as requested (Less impactful than previous step) */}
                      <path d="M -15 0 Q 0 -11 15 0 Q 0 11 -15 0 Z" 
                            fill="url(#goldHilt)" stroke="#451a03" strokeWidth="0.8">
-                           {/* Animation: Outline Glows synchronously with pupil - SUBTLER */}
-                           <animate attributeName="stroke" values="#451a03; #b45309; #451a03" dur="2s" repeatCount="indefinite" />
-                           <animate attributeName="stroke-width" values="0.8; 1.5; 0.8" dur="2s" repeatCount="indefinite" />
+                           {/* Animation: Outline Glows synchronously with pupil - MODERATE */}
+                           <animate attributeName="stroke" values="#451a03; #d97706; #451a03" dur="2s" repeatCount="indefinite" />
+                           <animate attributeName="stroke-width" values="0.8; 1.8; 0.8" dur="2s" repeatCount="indefinite" />
                      </path>
                      
                      {/* 3. The Sclera (Dark Tech Background) */}
@@ -339,9 +339,9 @@ const ShieldLogo = () => (
 
                      {/* 5. The Pupil (AI Core) - Pulsing Animation */}
                      <circle cx="0" cy="0" r="3" fill="url(#aiEyeGlow)">
-                         {/* Animación: Thinking Effect (Reduced: 0.4 to 1 opacity, 2.5 to 4.5 size) */}
+                         {/* Animación: Thinking Effect (Impactful: 0.4 to 1 opacity, 2.5 to 6 size) */}
                          <animate attributeName="opacity" values="0.4; 1; 0.4" dur="2s" repeatCount="indefinite" />
-                         <animate attributeName="r" values="2.5; 4.5; 2.5" dur="2s" repeatCount="indefinite" />
+                         <animate attributeName="r" values="2.5; 6; 2.5" dur="2s" repeatCount="indefinite" />
                      </circle>
                      
                      {/* 6. Center Glint (Pure White) */}
