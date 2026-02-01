@@ -432,7 +432,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none transition-all shadow-sm text-sm"
-                                placeholder="Ingrese su contraseña..."
+                                placeholder=""
                                 autoFocus
                             />
                         </div>
