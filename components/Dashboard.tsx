@@ -476,7 +476,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
             <header className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-20 flex justify-between items-center shadow-sm">
                 <div>
                     {/* Updated Font */}
-                    <h1 className="text-xs font-tech font-bold text-gray-900 leading-tight tracking-wider uppercase flex items-center gap-1">
+                    <h1 className="text-sm font-tech font-bold text-gray-900 leading-tight tracking-wider uppercase flex items-center gap-1">
                         <span>🛰️</span> SalesComander <span className="text-blue-600">Pro</span>
                     </h1>
                     <div className="flex items-center gap-1.5 mt-0.5">
