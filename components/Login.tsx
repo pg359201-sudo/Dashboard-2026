@@ -431,7 +431,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none transition-all shadow-sm text-sm"
+                                className="block w-full pl-10 pr-3 h-12 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none transition-all shadow-sm text-sm"
                                 placeholder=""
                                 autoFocus
                             />
@@ -447,7 +447,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-slate-600 to-slate-800 hover:from-slate-700 hover:to-slate-900 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-center items-center transform active:scale-[0.98]"
+                        className="w-full h-12 bg-gradient-to-r from-slate-600 to-slate-800 hover:from-slate-700 hover:to-slate-900 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all flex justify-center items-center transform active:scale-[0.98]"
                     >
                         {loading ? (
                             <Loader2 className="animate-spin h-5 w-5" />
