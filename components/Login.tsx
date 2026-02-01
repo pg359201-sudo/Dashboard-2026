@@ -402,8 +402,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         <ShieldLogo />
                     </div>
 
-                    <h1 className="text-xl font-tech font-bold text-white mb-2 relative z-10 tracking-wider uppercase -mt-4 whitespace-nowrap">SalesComander Pro</h1>
-                    <p className="text-slate-300 text-xs relative z-10">Reconocimiento y Despliegue Táctico</p>
+                    <h1 className="text-xl font-tech font-bold text-white relative z-10 tracking-wider uppercase -mt-2 whitespace-nowrap">SalesComander Pro</h1>
                 </div>
                 
                 <form onSubmit={handleSubmit} className="p-8">
@@ -444,8 +443,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         )}
                     </button>
                     
-                    <div className="mt-6 text-center text-xs text-slate-400 space-y-3">
-                        <p>v1.1.0 | Secured by Vercel</p>
+                    <div className="mt-6 text-center text-[10px] text-slate-400 space-y-3">
+                        <p>Built by PascaTech</p>
                     </div>
                 </form>
             </div>

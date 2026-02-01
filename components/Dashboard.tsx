@@ -16,7 +16,7 @@ interface DashboardProps {
 // --- Local Components for Dashboard ---
 
 interface KpiCardProps {
-    title: string;
+    title: string | React.ReactNode;
     value: string;
     icon: React.ReactNode;
     trend: number | null;
@@ -476,22 +476,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
             <header className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-20 flex justify-between items-center shadow-sm">
                 <div>
                     {/* Updated Font */}
-                    <h1 className="text-base font-tech font-bold text-gray-900 leading-tight tracking-wider uppercase">
-                        SalesComander <span className="text-blue-600">Pro</span>
+                    <h1 className="text-xs font-tech font-bold text-gray-900 leading-tight tracking-wider uppercase flex items-center gap-1">
+                        <span>🛰️</span> SalesComander <span className="text-blue-600">Pro</span>
                     </h1>
-                    <div className="flex items-center gap-2 mt-1">
-                        <span className="flex h-2 w-2 relative">
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="flex h-1 w-1 relative">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            <span className="relative inline-flex rounded-full h-1 w-1 bg-green-500"></span>
                         </span>
-                        <p className="text-xs text-gray-500 font-medium">Online v1.2</p>
+                        <p className="text-[8px] text-gray-500 font-medium">Online v1.2</p>
                         
                         <button 
                             onClick={handleRefresh}
                             disabled={isRefreshing}
-                            className="ml-2 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded border border-blue-200 transition-colors"
+                            className="ml-1 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[8px] px-1.5 py-0.5 rounded border border-blue-200 transition-colors"
                         >
-                            <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                            <RefreshCw className={`h-2.5 w-2.5 ${isRefreshing ? 'animate-spin' : ''}`} />
                             {isRefreshing ? '...' : 'Sync'}
                         </button>
                     </div>
@@ -535,7 +535,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                         trend={null}
                     />
                     <KpiCard 
-                        title="var YTD" 
+                        title={
+                            <span>
+                                VAR YTD <span className="text-[9px] font-normal text-gray-400 normal-case opacity-80">(cts activos)</span>
+                            </span>
+                        } 
                         value={`${formatNumber(kpis.totalGrowth * 100, 1)}%`} 
                         icon={kpis.totalGrowth >= 0 ? <TrendingUp className="h-4 w-4 text-green-600" /> : <TrendingDown className="h-4 w-4 text-red-600" />}
                         trend={null}
