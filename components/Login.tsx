@@ -146,18 +146,18 @@ const HeaderTechPattern = () => (
                 </circle>
 
                 {/* --- CENTRAL ACTIVE NODES (NUEVO) --- */}
-                {/* Central-Left Pulse */}
-                <circle cx="38%" cy="50%" r="1.2" fill="white" opacity="0.1">
+                {/* Central-Left Pulse - Separado del centro (38% -> 25%) */}
+                <circle cx="25%" cy="50%" r="1.2" fill="white" opacity="0.1">
                     <animate attributeName="opacity" values="0.1; 0.5; 0.1" dur="3s" repeatCount="indefinite" />
                 </circle>
 
-                {/* Central-Right Blink */}
-                <circle cx="62%" cy="45%" r="1.2" fill="white" opacity="0.1">
+                {/* Central-Right Blink - Separado del centro (62% -> 75%) */}
+                <circle cx="75%" cy="45%" r="1.2" fill="white" opacity="0.1">
                     <animate attributeName="opacity" values="0.1; 0.6; 0.1" dur="4.5s" repeatCount="indefinite" begin="1s" />
                 </circle>
 
-                {/* Center-Top Subtle */}
-                <circle cx="50%" cy="25%" r="0.8" fill="white" opacity="0.1">
+                {/* Center-Top Subtle - Separado hacia arriba (25% -> 15%) */}
+                <circle cx="50%" cy="15%" r="0.8" fill="white" opacity="0.1">
                     <animate attributeName="opacity" values="0; 0.4; 0" dur="2s" repeatCount="indefinite" begin="0.5s" />
                 </circle>
 
