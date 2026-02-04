@@ -63,12 +63,19 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
     // Helper para colores específicos solicitados
     const getCategoryColor = (label: string) => {
         const normalized = label.toLowerCase();
+        // Categorías existentes
         if (normalized.includes('agua')) return '#7dd3fc'; // Celeste claro
         if (normalized.includes('jugos')) return '#f97316'; // Naranja
         if (normalized.includes('isotonico')) return '#1d4ed8'; // Azul Fuerte (Blue-700)
         if (normalized.includes('vinos')) return '#8b5cf6'; // Violeta
         if (normalized.includes('energizantes')) return '#22c55e'; // Verde ajustado
         if (normalized.includes('spirits')) return '#fdba74'; // Naranja claro
+        
+        // Nuevas Categorías (Colores Solicitados)
+        if (normalized.includes('ref ss')) return '#ef4444'; // Rojo (Red-500)
+        if (normalized.includes('retornable')) return '#be123c'; // Bordo claro (Rose-700)
+        if (normalized.includes('latas')) return '#94a3b8'; // Gris (Slate-400)
+        
         return '#cbd5e1'; // Default gris
     };
 
@@ -76,13 +83,9 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
     const categories = useMemo(() => {
         if (!isExpanded) return [];
         
-        // Categorías a EXCLUIR según solicitud: Colas, Sabores, Saborizadas
-        const excludedCategories = ['Colas', 'Sabores', 'Saborizadas'];
-
-        return [
-            { label: 'Colas', value: client.VolColas },
-            { label: 'Sabores', value: client.VolSabores },
-            { label: 'Saborizadas', value: client.VolSaborizadas },
+        // 1. Grupo Estándar: Se ordenan por volumen descendente
+        // Excluimos Colas, Sabores y Saborizadas explícitamente aquí al no incluirlas en la lista
+        const standardItems = [
             { label: 'Agua', value: client.VolAgua },
             { label: 'Jugos', value: client.VolJugos },
             { label: 'Isotonico', value: client.VolIsotonico },
@@ -90,9 +93,19 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
             { label: 'Spirits', value: client.VolSpirits },
             { label: 'Vinos', value: client.VolVinos },
         ]
-        .filter(c => !excludedCategories.includes(c.label)) // FILTRO DE EXCLUSIÓN
-        .sort((a, b) => (b.value || 0) - (a.value || 0))
-        .filter(c => (c.value || 0) > 0);
+        .filter(c => (c.value || 0) > 0)
+        .sort((a, b) => (b.value || 0) - (a.value || 0));
+
+        // 2. Grupo Fijo Inferior: Retornable, Ref SS, Latas
+        // Estas DEBEN ser las últimas 3, en este orden específico.
+        const bottomItems = [
+            { label: 'Retornable', value: client.VolRetornable },
+            { label: 'Ref SS', value: client.VolRefSS },
+            { label: 'Latas', value: client.VolLatas },
+        ].filter(c => (c.value || 0) > 0);
+
+        // Concatenamos: Primero los estándares ordenados por venta, luego los fijos al final
+        return [...standardItems, ...bottomItems];
     }, [isExpanded, client]);
     
     // Share Calculation

@@ -27,6 +27,11 @@ export interface SalesRecord {
     VolEnergizantes: number;
     VolSpirits: number;
     VolVinos: number;
+    
+    // Nuevas columnas solicitadas
+    VolRefSS: number;
+    VolRetornable: number;
+    VolLatas: number;
 }
 
 export interface UserSession {

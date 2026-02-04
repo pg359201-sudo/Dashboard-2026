@@ -121,7 +121,12 @@ const sanitizeData = (rawData: any[]): SalesRecord[] => {
             VolIsotonico: parseNum(getValue(row, ['ISOTÓNICO', 'ISOTONICO', 'Vol Isotonico'])),
             VolEnergizantes: parseNum(getValue(row, ['ENERGIZANTES', 'Vol Energizantes'])),
             VolSpirits: parseNum(getValue(row, ['SPIRITS', 'Vol Spirits'])),
-            VolVinos: parseNum(getValue(row, ['VINOS', 'Vol Vinos']))
+            VolVinos: parseNum(getValue(row, ['VINOS', 'Vol Vinos'])),
+            
+            // NUEVAS CATEGORIAS
+            VolRefSS: parseNum(getValue(row, ['Ref SS', 'RefSS', 'Vol Ref SS', 'Ref. SS'])),
+            VolRetornable: parseNum(getValue(row, ['Retornables', 'Retornable', 'Vol Retornables'])),
+            VolLatas: parseNum(getValue(row, ['Latas', 'Lata', 'Vol Latas', 'Vol Lata']))
         };
     });
 };
