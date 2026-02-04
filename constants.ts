@@ -98,8 +98,20 @@ export const COLORS = [
 export const formatNumber = (value: number | undefined | null, decimals: number = 0): string => {
     if (value === undefined || value === null || isNaN(value)) return '0';
     
-    return new Intl.NumberFormat('es-ES', {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-    }).format(value);
+    // Forced Spanish Format: 
+    // Thousands separator: "." (Dot)
+    // Decimal separator: "," (Comma)
+    
+    const num = Number(value);
+    const fixed = num.toFixed(decimals);
+    const [integerPart, decimalPart] = fixed.split('.');
+    
+    // Manual regex replacement to ensure ALL numbers > 999 get the dot
+    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    
+    if (decimals > 0) {
+        return `${formattedInteger},${decimalPart}`;
+    }
+    
+    return formattedInteger;
 };
