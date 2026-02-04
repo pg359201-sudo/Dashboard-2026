@@ -93,7 +93,7 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
             { label: 'Spirits', value: client.VolSpirits },
             { label: 'Vinos', value: client.VolVinos },
         ]
-        .filter(c => (c.value || 0) > 0)
+        // Se elimina el filtro para que aparezcan siempre, incluso con 0
         .sort((a, b) => (b.value || 0) - (a.value || 0));
 
         // 2. Grupo Fijo Inferior: Retornable, Ref SS, Latas
@@ -102,7 +102,8 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
             { label: 'Retornable', value: client.VolRetornable },
             { label: 'Ref SS', value: client.VolRefSS },
             { label: 'Latas', value: client.VolLatas },
-        ].filter(c => (c.value || 0) > 0);
+        ];
+        // Se elimina el filtro para que aparezcan siempre
 
         // Concatenamos: Primero los estándares ordenados por venta, luego los fijos al final
         return [...standardItems, ...bottomItems];
@@ -218,7 +219,10 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
                             {categories.length > 0 ? (
                                 <div className="grid grid-cols-3 gap-2">
                                     {categories.map((cat, idx) => {
-                                        const percent = ((cat.value || 0) / (client.UC12mm || 1)) * 100;
+                                        const value = cat.value || 0;
+                                        const percent = ((value) / (client.UC12mm || 1)) * 100;
+                                        const isZero = value === 0;
+
                                         return (
                                             <div key={cat.label} className="bg-white border border-slate-100 rounded-md p-2 shadow-sm flex flex-col justify-between h-14 hover:shadow-md transition-shadow">
                                                 <div className="flex items-center gap-1">
@@ -230,8 +234,8 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, isExpanded, onToggle }) =
                                                     <span className="text-xs font-bold text-slate-800 leading-none">
                                                         {formatNumber(percent, 1)}<span className="text-[8px] text-slate-400">%</span>
                                                     </span>
-                                                    <span className="text-[9px] font-medium text-slate-400">
-                                                        {formatNumber(cat.value, 0)} UC
+                                                    <span className={`text-[8px] font-medium ${isZero ? 'text-red-500 font-bold' : 'text-slate-400'}`}>
+                                                        {formatNumber(value, 0)} UC
                                                     </span>
                                                 </div>
                                             </div>
