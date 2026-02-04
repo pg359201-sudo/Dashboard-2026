@@ -8,9 +8,10 @@ export const generateSalesAnalysis = async (
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
-        // PRE-PROCESAMIENTO: Limpieza de nombres de GEC para el chat
-        // Se aplica a TODOS los GEC detectados (ej: "58 - LATON" -> "LATON")
-        const cleanedData = contextData.map(record => {
+        // PRE-PROCESAMIENTO: 
+        // 1. Limpieza de nombres de GEC para el chat (ej: "58 - LATON" -> "LATON")
+        // 2. EXCLUSIÓN DE ID: Se elimina el campo 'id' (ej: "row-51") para que la IA no lo mencione.
+        const cleanedData = contextData.map(({ id, ...record }) => {
             const newRecord = { ...record };
             if (newRecord.GEC) {
                 // Regex mejorado: Elimina espacios iniciales opcionales, digitos, guiones y espacios excedentes.
@@ -20,11 +21,10 @@ export const generateSalesAnalysis = async (
             return newRecord;
         });
 
-        // Se envía la totalidad de los datos (ya limpios)
+        // Se envía la totalidad de los datos (ya limpios y sin ID)
         const dataString = JSON.stringify(cleanedData);
 
         // MODIFICACIÓN: Prompt de Sistema "Analista Experto"
-        // ACTUALIZACIÓN: Se añaden las reglas explícitas para todos los GEC listados.
         const systemInstruction = `Actúa como un Analista de Información Experto y Senior.
         Tu objetivo es proveer inteligencia de negocios precisa basada en los datos adjuntos.
 
@@ -32,8 +32,9 @@ export const generateSalesAnalysis = async (
         1. RESPUESTAS CONCRETAS Y SIN RODEOS: Ve directo al grano.
         2. VERACIDAD TOTAL: Responde basándote ÚNICAMENTE en el JSON adjunto.
         3. ANÁLISIS INTEGRAL: Realiza cálculos sobre todos los registros.
+        4. LIMPIEZA DE IDENTIFICADORES: Jamás muestres IDs internos o números de fila. Usa solo el nombre del cliente (RazonSocial).
 
-        4. FORMATO VISUAL (ESTRICTO - LIMPIEZA Y LEGIBILIDAD): 
+        5. FORMATO VISUAL (ESTRICTO - LIMPIEZA Y LEGIBILIDAD): 
            - **ESTRUCTURA JERÁRQUICA**: Usa Títulos Markdown (##) para separar la idea principal de los detalles.
            - **PROHIBIDO TABLAS**: No uses tablas markdown ni separadores '|'.
            - **FICHA DESTACADA**: Si preguntas por un "Mayor/Menor/Mejor", presenta al ganador claramente separado del resto usando negritas para etiquetas.
@@ -55,7 +56,7 @@ export const generateSalesAnalysis = async (
            ## 🏆 [Concepto Principal]
            **[NOMBRE DEL CLIENTE]**
            * **Segmento:** [NOMBRE GEC LIMPIO]
-           * **Crecimiento:** [Valor]%
+           * **TP Red:** [Valor]%
            * **Volumen:** [Valor] UC
            
            ## 📊 [Contexto / Otros]
@@ -65,8 +66,8 @@ export const generateSalesAnalysis = async (
         Diccionario de Datos:
         - UC12mm: Volumen Anual (Cajas Unitarias).
         - Var2025vs2024: Crecimiento YTD (decimal, ej: 0.10 es 10%).
-        - ShareREFRESCOS: Participación de mercado.
-        - TP_RED: Ejecución en Punto de Venta (Porcentaje, ej: 0.95 es 95%). Indica calidad de ejecución.
+        - ShareREFRESCOS: Participación de mercado. NOTA: Si el valor es 0, vacío o muy bajo, significa que NO TIENE MEDICIÓN. No es un mal resultado, simplemente no hay datos de auditoría.
+        - TP_RED: "Total Ponderado, Right Execution Daily". Mide la ejecución en PDV. IMPORTANTE: El valor en la base es DECIMAL (ej: 0.51) pero DEBE MOSTRARSE SIEMPRE COMO PORCENTAJE (ej: 51%). Si el campo está vacío o es 0, significa que el cliente NO TIENE MEDICIÓN/RELEVAMIENTO (no implica mala ejecución).
         `;
 
         const response = await ai.models.generateContent({
