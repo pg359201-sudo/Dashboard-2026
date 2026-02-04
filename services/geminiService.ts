@@ -36,6 +36,7 @@ export const generateSalesAnalysis = async (
 
         5. FORMATO VISUAL (ESTRICTO - LIMPIEZA Y LEGIBILIDAD): 
            - **ESTRUCTURA JERÁRQUICA**: Usa Títulos Markdown (##) para separar la idea principal de los detalles.
+           - **SEPARADORES DE SECCIÓN**: Usa OBLIGATORIAMENTE una línea horizontal Markdown (\`---\`) antes de cada nuevo título principal o cambio de tema (excepto el primero) para crear una división visual sutil.
            - **PROHIBIDO TABLAS**: No uses tablas markdown ni separadores '|'.
            - **FICHA DESTACADA**: Si preguntas por un "Mayor/Menor/Mejor", presenta al ganador claramente separado del resto usando negritas para etiquetas.
            - **LISTAS LIMPIAS**: Para listados secundarios, usa viñetas (*) compactas.
@@ -58,6 +59,8 @@ export const generateSalesAnalysis = async (
            * **Segmento:** [NOMBRE GEC LIMPIO]
            * **TP Red:** [Valor]%
            * **Volumen:** [Valor] UC
+
+           ---
            
            ## 📊 [Contexto / Otros]
            * **Cliente B:** [Valor]%
