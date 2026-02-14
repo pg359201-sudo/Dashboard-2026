@@ -21,6 +21,11 @@ export const generateSalesAnalysis = async (
             return newRecord;
         });
 
+        // CÁLCULO DE TOTALES PARA CONTEXTO (Preventivo para alucinaciones de conteo)
+        // Se calcula aquí para inyectarlo como "Verdad Absoluta" en el prompt
+        const totalCount = cleanedData.length;
+        const totalVolume = cleanedData.reduce((acc, curr) => acc + (Number(curr.UC12mm) || 0), 0);
+
         // Se envía la totalidad de los datos (ya limpios y sin ID)
         const dataString = JSON.stringify(cleanedData);
 
@@ -52,6 +57,13 @@ export const generateSalesAnalysis = async (
              * "58 - LATON" -> "LATON"
              * "99 - CUSTOMIZADO" -> "CUSTOMIZADO"
            
+           6. MANEJO DE CONTEOS Y SEGMENTACIÓN (CRÍTICO):
+           - El dataset adjunto contiene un TOTAL GLOBAL de ${totalCount} clientes activos.
+           - **FILTRADO POR CANAL**: Si el usuario pregunta "¿cuántos almacenes?", "¿cuántas bodegas?", "¿cuántos supermercados?", DEBES filtrar los datos basándote en la columna 'GrupoCanal'.
+             * Busca valores como "ALMACEN", "ALMACENES", "BODEGA", "TRADICIONAL" dentro de 'GrupoCanal' para responder esa pregunta específica.
+             * NO confundas "Almacén" (segmento) con el Total de Clientes. Son cosas distintas.
+           - SOLO responde con el Total Global (${totalCount}) si la pregunta es genérica (ej: "total de clientes", "total de puntos de venta", "cuántos hay en total").
+
            Ejemplo de Estructura de Respuesta Ideal:
            
            ## 🏆 [Concepto Principal]
@@ -71,11 +83,16 @@ export const generateSalesAnalysis = async (
         - Var2025vs2024: Crecimiento YTD (decimal, ej: 0.10 es 10%).
         - ShareREFRESCOS: Participación de mercado. NOTA: Si el valor es 0, vacío o muy bajo, significa que NO TIENE MEDICIÓN. No es un mal resultado, simplemente no hay datos de auditoría.
         - TP_RED: "Total Ponderado, Right Execution Daily". Mide la ejecución en PDV. IMPORTANTE: El valor en la base es DECIMAL (ej: 0.51) pero DEBE MOSTRARSE SIEMPRE COMO PORCENTAJE (ej: 51%). Si el campo está vacío o es 0, significa que el cliente NO TIENE MEDICIÓN/RELEVAMIENTO (no implica mala ejecución).
+        - GrupoCanal: Canal de venta o tipo de negocio (Ej: Bodega, Supermercado, Almacén, etc.).
         `;
 
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
-            contents: `BASE DE DATOS DE VENTAS (JSON):
+            contents: `RESUMEN DE AUDITORÍA DE DATOS (VERDAD DE CAMPO):
+            - Total Clientes/Registros: ${totalCount}
+            - Volumen Total: ${Math.round(totalVolume)}
+
+            BASE DE DATOS DE VENTAS (JSON):
             ${dataString}
             
             SOLICITUD DE ANÁLISIS: ${query}`,
