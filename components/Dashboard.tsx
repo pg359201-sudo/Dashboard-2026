@@ -386,12 +386,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
     // Filtering logic
     const filteredData = useMemo(() => {
         if (!hasData) return [];
-        return localData.filter(item => {
+        const filtered = localData.filter(item => {
             return (filters.GEC === 'all' || item.GEC === filters.GEC) &&
                    (filters.GrupoCanal === 'all' || item.GrupoCanal === filters.GrupoCanal) &&
                    (filters.RutaVenta === 'all' || item.RutaVenta === filters.RutaVenta) &&
                    (filters.RutaDesarr === 'all' || item.RutaDesarr === filters.RutaDesarr);
         });
+        
+        // Ordenar de mayor a menor Volumen (UC12mm)
+        return filtered.sort((a, b) => (b.UC12mm || 0) - (a.UC12mm || 0));
     }, [localData, filters, hasData]);
 
     // KPI Calculations
