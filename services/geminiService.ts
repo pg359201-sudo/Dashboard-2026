@@ -87,7 +87,7 @@ export const generateSalesAnalysis = async (
         `;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-flash-latest',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: `RESUMEN DE AUDITORÍA DE DATOS (VERDAD DE CAMPO):
             - Total Clientes/Registros: ${totalCount}
             - Volumen Total: ${Math.round(totalVolume)}
