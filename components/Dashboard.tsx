@@ -494,7 +494,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                 <div>
                     {/* Updated Font */}
                     <h1 className="text-sm font-tech font-bold text-gray-900 leading-tight tracking-wider uppercase flex items-center gap-1">
-                        <span>🛰️</span> SalesComander <span className="text-blue-600">Pro</span>
+                        <span>🛰️</span> SalesCommander <span className="text-blue-600">Pro</span>
                     </h1>
                     <div className="flex items-center gap-1.5 mt-0.5">
                         <span className="flex h-1 w-1 relative">
