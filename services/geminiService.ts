@@ -97,14 +97,13 @@ export const generateSalesAnalysis = async (
             
             SOLICITUD DE ANÁLISIS: ${query}`,
              config: {
-                systemInstruction: systemInstruction,
-                thinkingConfig: { thinkingBudget: 0 } // Disable thinking for faster response on flash model
+                systemInstruction: systemInstruction
             }
         });
 
         return response.text || "No se pudo generar una respuesta.";
     } catch (error) {
         console.error("Gemini Error:", error);
-        return "Error crítico en el análisis. Es posible que el volumen de datos exceda el límite momentáneo o haya problemas de conexión.";
+        return `Error crítico en el análisis. Detalles: ${error instanceof Error ? error.message : JSON.stringify(error)}`;
     }
 };
