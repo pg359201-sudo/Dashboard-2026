@@ -3,7 +3,7 @@ import { SalesRecord, FilterState } from '../types';
 import { 
     Treemap, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, ChevronUp, BarChart3, Layers, Zap, Target, Trophy } from 'lucide-react';
+import { ChevronDown, Filter, TrendingUp, TrendingDown, Package, FileWarning, RefreshCw, AlertCircle, Award, PieChart, CheckCircle, ChevronUp, BarChart3, Layers, Zap, Target, Trophy, Search, X } from 'lucide-react';
 import { COLORS, formatNumber } from '../constants';
 import { ChatAssistant } from './ChatAssistant';
 import { loadFromStorage } from '../services/dataService';
@@ -346,6 +346,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
     const [localData, setLocalData] = useState<SalesRecord[]>(initialData || []);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [expandedClientId, setExpandedClientId] = useState<string | null>(null); // State for accordion
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<FilterState>({
         GEC: 'all',
         GrupoCanal: 'all',
@@ -426,6 +428,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
         
         return { totalVol, totalGrowth, avgShare, avgTpRed };
     }, [filteredData]);
+
+    // Search logic for Client List
+    const searchedClients = useMemo(() => {
+        if (!searchQuery.trim()) return filteredData;
+        const query = searchQuery.toLowerCase();
+        return filteredData.filter(client => 
+            (client.RazonSocial && client.RazonSocial.toLowerCase().includes(query))
+        );
+    }, [filteredData, searchQuery]);
 
     // Data Preparation (Charts & Lists)
     const processedData = useMemo(() => {
@@ -700,21 +711,51 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
 
                 {/* Client List */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                        <h3 className="font-bold text-gray-800 text-sm">Listado de Clientes</h3>
-                        <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full font-medium">
-                            {filteredData.length}
-                        </span>
+                    <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center min-h-[60px]">
+                        {isSearchOpen ? (
+                            <div className="flex items-center w-full gap-2">
+                                <Search className="h-4 w-4 text-gray-400" />
+                                <input 
+                                    type="text" 
+                                    autoFocus
+                                    placeholder="Buscar cliente..." 
+                                    className="flex-1 bg-transparent border-none outline-none text-sm text-gray-800 placeholder-gray-400"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                                <button onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }} className="p-1 hover:bg-gray-200 rounded-full text-gray-500">
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-bold text-gray-800 text-sm">Listado de Clientes</h3>
+                                    <button onClick={() => setIsSearchOpen(true)} className="p-1 hover:bg-gray-200 rounded-full text-gray-500 transition-colors">
+                                        <Search className="h-4 w-4" />
+                                    </button>
+                                </div>
+                                <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full font-medium">
+                                    {searchedClients.length}
+                                </span>
+                            </>
+                        )}
                     </div>
                     <div className="divide-y divide-gray-100">
-                        {filteredData.map((client) => (
-                            <ClientRow 
-                                key={client.id} 
-                                client={client} 
-                                isExpanded={expandedClientId === client.id}
-                                onToggle={() => handleToggleClient(client.id)}
-                            />
-                        ))}
+                        {searchedClients.length > 0 ? (
+                            searchedClients.map((client) => (
+                                <ClientRow 
+                                    key={client.id} 
+                                    client={client} 
+                                    isExpanded={expandedClientId === client.id}
+                                    onToggle={() => handleToggleClient(client.id)}
+                                />
+                            ))
+                        ) : (
+                            <div className="p-8 text-center text-gray-500 text-sm">
+                                No se encontraron clientes con "{searchQuery}"
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>
