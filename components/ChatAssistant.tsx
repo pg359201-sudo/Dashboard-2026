@@ -79,7 +79,7 @@ export const ChatAssistant: React.FC<ChatProps> = ({ data }) => {
                 <div className="flex items-center gap-2">
                     <Bot className="h-5 w-5" />
                     <div>
-                        <h3 className="font-bold text-sm">Analista SalesComander</h3>
+                        <h3 className="font-bold text-sm">Analista Sales·Commander</h3>
                         <p className="text-xs text-blue-100 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
                             Conectado a Gemini Flash
