@@ -6,7 +6,7 @@ export const generateSalesAnalysis = async (
     contextData: SalesRecord[]
 ): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         
         // PRE-PROCESAMIENTO: 
         // 1. Limpieza de nombres de GEC para el chat (ej: "58 - LATON" -> "LATON")
