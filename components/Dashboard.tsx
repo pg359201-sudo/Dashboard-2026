@@ -348,6 +348,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
     const [expandedClientId, setExpandedClientId] = useState<string | null>(null); // State for accordion
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [growthFilter, setGrowthFilter] = useState<'all' | 'positive' | 'negative'>('all');
     const [filters, setFilters] = useState<FilterState>({
         GEC: 'all',
         GrupoCanal: 'all',
@@ -431,12 +432,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
 
     // Search logic for Client List
     const searchedClients = useMemo(() => {
-        if (!searchQuery.trim()) return filteredData;
-        const query = searchQuery.toLowerCase();
-        return filteredData.filter(client => 
-            (client.RazonSocial && client.RazonSocial.toLowerCase().includes(query))
-        );
-    }, [filteredData, searchQuery]);
+        let result = filteredData;
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(client => 
+                (client.RazonSocial && client.RazonSocial.toLowerCase().includes(query))
+            );
+        }
+        
+        if (growthFilter === 'positive') {
+            result = result.filter(client => (client.Var2025vs2024 || 0) >= 0);
+        } else if (growthFilter === 'negative') {
+            result = result.filter(client => (client.Var2025vs2024 || 0) < 0);
+        }
+        
+        return result;
+    }, [filteredData, searchQuery, growthFilter]);
 
     // Data Preparation (Charts & Lists)
     const processedData = useMemo(() => {
@@ -723,7 +734,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
-                                <button onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }} className="p-1 hover:bg-gray-200 rounded-full text-gray-500">
+                                <div className="flex items-center gap-1 border-l border-gray-200 pl-2">
+                                    <button 
+                                        onClick={() => setGrowthFilter(prev => prev === 'positive' ? 'all' : 'positive')}
+                                        className={`p-1.5 rounded-full transition-colors ${growthFilter === 'positive' ? 'bg-green-100 text-green-600' : 'hover:bg-gray-200 text-gray-400'}`}
+                                        title="Crecimiento positivo (>= 0)"
+                                    >
+                                        <TrendingUp className="h-4 w-4" />
+                                    </button>
+                                    <button 
+                                        onClick={() => setGrowthFilter(prev => prev === 'negative' ? 'all' : 'negative')}
+                                        className={`p-1.5 rounded-full transition-colors ${growthFilter === 'negative' ? 'bg-red-100 text-red-600' : 'hover:bg-gray-200 text-gray-400'}`}
+                                        title="Caída (< 0)"
+                                    >
+                                        <TrendingDown className="h-4 w-4" />
+                                    </button>
+                                </div>
+                                <button onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }} className="p-1 hover:bg-gray-200 rounded-full text-gray-500 ml-1">
                                     <X className="h-4 w-4" />
                                 </button>
                             </div>
@@ -733,6 +760,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                                     <h3 className="font-bold text-gray-800 text-sm">Listado de Clientes</h3>
                                     <button onClick={() => setIsSearchOpen(true)} className="p-1 hover:bg-gray-200 rounded-full text-gray-500 transition-colors">
                                         <Search className="h-4 w-4" />
+                                    </button>
+                                    <div className="w-px h-4 bg-gray-300 mx-1"></div>
+                                    <button 
+                                        onClick={() => setGrowthFilter(prev => prev === 'positive' ? 'all' : 'positive')}
+                                        className={`p-1.5 rounded-full transition-colors ${growthFilter === 'positive' ? 'bg-green-100 text-green-600' : 'hover:bg-gray-200 text-gray-400'}`}
+                                        title="Crecimiento positivo (>= 0)"
+                                    >
+                                        <TrendingUp className="h-4 w-4" />
+                                    </button>
+                                    <button 
+                                        onClick={() => setGrowthFilter(prev => prev === 'negative' ? 'all' : 'negative')}
+                                        className={`p-1.5 rounded-full transition-colors ${growthFilter === 'negative' ? 'bg-red-100 text-red-600' : 'hover:bg-gray-200 text-gray-400'}`}
+                                        title="Caída (< 0)"
+                                    >
+                                        <TrendingDown className="h-4 w-4" />
                                     </button>
                                 </div>
                                 <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full font-medium">
