@@ -521,22 +521,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ data: initialData, onLogou
                     <h1 className="text-sm font-tech font-bold text-gray-900 leading-tight tracking-wider uppercase flex items-center gap-1">
                         <span>🛰️</span> Sales·Commander <span className="text-blue-600">Pro</span>
                     </h1>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="flex h-1 w-1 relative">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-1 w-1 bg-green-500"></span>
-                        </span>
-                        <p className="text-[8px] text-gray-500 font-medium">Online v1.2</p>
-                        
-                        <button 
-                            onClick={handleRefresh}
-                            disabled={isRefreshing}
-                            className="ml-1 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[8px] px-1.5 py-0.5 rounded border border-blue-200 transition-colors"
-                        >
-                            <RefreshCw className={`h-2.5 w-2.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            {isRefreshing ? '...' : 'Sync'}
-                        </button>
-                    </div>
                 </div>
                 <button onClick={onLogout} className="text-xs font-medium text-gray-600 hover:text-red-600 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
                     Salir
