@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SalesRecord } from '../types';
 import { generateSalesAnalysis } from '../services/geminiService';
-import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 interface ChatProps {
@@ -21,6 +21,7 @@ export const ChatAssistant: React.FC<ChatProps> = ({ data }) => {
         { id: 'init', role: 'assistant', content: 'Hola, soy tu analista de ventas virtual. ¿Qué deseas saber sobre los datos actuales?' }
     ]);
     const [loading, setLoading] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -56,6 +57,12 @@ export const ChatAssistant: React.FC<ChatProps> = ({ data }) => {
             e.preventDefault();
             handleSend();
         }
+    };
+
+    const handleCopy = (id: string, content: string) => {
+        navigator.clipboard.writeText(content);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
     };
 
     if (!isOpen) {
@@ -104,11 +111,20 @@ export const ChatAssistant: React.FC<ChatProps> = ({ data }) => {
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-slate-200 text-slate-600' : 'bg-blue-100 text-blue-600'}`}>
                             {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                         </div>
-                        <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'}`}>
+                        <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm relative group ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'}`}>
                             {msg.role === 'assistant' ? (
-                                <div className="prose prose-sm prose-slate max-w-none leading-relaxed">
-                                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                                </div>
+                                <>
+                                    <div className="prose prose-sm prose-slate max-w-none leading-relaxed pr-6">
+                                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                    </div>
+                                    <button
+                                        onClick={() => handleCopy(msg.id, msg.content)}
+                                        className="absolute top-2 right-2 p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                                        title="Copiar respuesta"
+                                    >
+                                        {copiedId === msg.id ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                                    </button>
+                                </>
                             ) : (
                                 msg.content
                             )}
